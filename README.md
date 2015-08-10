@@ -3,7 +3,7 @@ The official Rhapsody and Napster clients are showing just a subset of new relea
 This client shows EVERY single album, EP or single which gets released so you won't miss them anymore.
 
 You need a Rhapsody or Napster account to use this application.
-![Preview](http://i.imgur.com/XjWezA2.png)
+![Preview](http://i.imgur.com/8HU6VMm.png)
 
 This application is based on [rhapsody-java-sdk](https://github.com/kaiwinter/rhapsody-java-sdk)
 
