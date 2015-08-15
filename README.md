@@ -10,5 +10,8 @@ This appliation uses two libraries which I wrote for this project:
 - [rhapsody-java-sdk](https://github.com/kaiwinter/rhapsody-java-sdk)
 - [jfx-tableview-filter](https://github.com/kaiwinter/jfx-tableview-filter)
 
+and also
+- [ControlsFX](http://fxexperience.com/controlsfx/)
+
 ## Download
 [Download v1.0.2](https://github.com/kaiwinter/NapsterReleases/releases/download/v1.0.2/napster-releases-1.0.2.jar)
