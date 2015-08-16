@@ -28,6 +28,7 @@ import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
@@ -239,6 +240,10 @@ public final class MainController {
 
 	public void showArtist(String artistId) {
 		artistTabController.setLoading(true);
+
+		Image image = rhapsodySdkWrapper.loadArtistImage(artistId);
+		artistTabController.setArtistImage(image);
+
 		rhapsodySdkWrapper.loadArtistMeta(artistId, new Callback<ArtistData>() {
 			@Override
 			public void success(ArtistData artistData, Response response) {

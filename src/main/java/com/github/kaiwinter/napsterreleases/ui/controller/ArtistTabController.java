@@ -9,6 +9,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Region;
 
 /**
@@ -24,6 +26,9 @@ public final class ArtistTabController {
 
 	@FXML
 	private TextArea artistBlurbsTa;
+
+	@FXML
+	private ImageView artistImageIv;
 
 	@FXML
 	private ProgressIndicator loadingIndicator;
@@ -44,10 +49,15 @@ public final class ArtistTabController {
 		artistNameTf.setText(null);
 		artistBioTa.setText(null);
 		artistBlurbsTa.setText(null);
+		artistImageIv.setImage(null);
 	}
 
 	public void setLoading(boolean loading) {
 		loadingIndicator.visibleProperty().set(loading);
 		loadingIndicatorBackground.visibleProperty().set(loading);
+	}
+
+	public void setArtistImage(Image image) {
+		artistImageIv.setImage(image);
 	}
 }

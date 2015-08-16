@@ -54,7 +54,7 @@ public final class AlbumTabController {
 
 		if (albumData.images.size() > 0) {
 			String image = albumData.images.get(0).url;
-			albumImageIv.setImage(new Image(image));
+			albumImageIv.setImage(new Image(image, true));
 		}
 
 		albumNameTf.setText(albumData.name);
