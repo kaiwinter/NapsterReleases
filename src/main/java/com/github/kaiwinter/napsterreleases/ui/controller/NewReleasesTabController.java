@@ -28,6 +28,8 @@ import javafx.scene.layout.Region;
  */
 public final class NewReleasesTabController {
 
+	static final String RHAPSODY_CURATED = "rhapsody_curated";
+
 	@FXML
 	private TreeView<GenreData> genreList;
 
@@ -185,6 +187,13 @@ public final class NewReleasesTabController {
 	public void setGenres(Collection<GenreData> genres) {
 		Platform.runLater(() -> {
 			TreeItem<GenreData> root = new TreeItem<>();
+			GenreData dfa = new GenreData();
+			dfa.name = "< Rhapsody curated >";
+			dfa.id = RHAPSODY_CURATED;
+			dfa.description = "Releases curated by Rhapsody.";
+			TreeItem<GenreData> dummyForAll = new TreeItem<>(dfa);
+			root.getChildren().add(dummyForAll);
+
 			for (GenreData genreData : genres) {
 				TreeItem<GenreData> treeViewItem = new TreeItem<>(genreData);
 				root.getChildren().add(treeViewItem);
@@ -217,7 +226,7 @@ public final class NewReleasesTabController {
 		AlbumData selectedAlbum = releasesTv.getSelectionModel().getSelectedItem();
 		return selectedAlbum;
 	}
-	
+
 	public GenreData getSelectedGenre() {
 		TreeItem<GenreData> selectedItem = genreList.getSelectionModel().getSelectedItem();
 		if (selectedItem != null) {

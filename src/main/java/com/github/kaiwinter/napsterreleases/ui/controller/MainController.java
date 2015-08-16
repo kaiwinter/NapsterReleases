@@ -204,7 +204,7 @@ public final class MainController {
 
 	public void showNewReleases(GenreData genreData) {
 		newReleasesTabController.setLoading(true);
-		rhapsodySdkWrapper.loadNewReleasesOfGenre(genreData.id, new Callback<Collection<AlbumData>>() {
+		Callback<Collection<AlbumData>> callback = new Callback<Collection<AlbumData>>() {
 
 			@Override
 			public void success(Collection<AlbumData> albums, Response response) {
@@ -228,7 +228,13 @@ public final class MainController {
 				LOGGER.error("Error loading albums ({})", error.getMessage());
 				handleError(error, () -> showNewReleases(genreData));
 			}
-		});
+		};
+
+		if (NewReleasesTabController.RHAPSODY_CURATED.equals(genreData.id)) {
+			rhapsodySdkWrapper.loadAlbumNewReleases(callback);
+		} else {
+			rhapsodySdkWrapper.loadGenreNewReleases(genreData.id, callback);
+		}
 	}
 
 	public void showArtist(String artistId) {

@@ -69,7 +69,6 @@
 		<!-- <artifactId>jfx-tableview-filter</artifactId> -->
 		<!-- <version>1.0.1-SNAPSHOT</version> -->
 		<!-- </dependency> -->
-
 		<!-- <dependency> -->
 		<!-- <groupId>com.github.kaiwinter</groupId> -->
 		<!-- <artifactId>rhapsody-java-sdk</artifactId> -->
@@ -81,16 +80,16 @@
 		<dependency>
 			<groupId>com.github.kaiwinter</groupId>
 			<artifactId>rhapsody-java-sdk</artifactId>
-			<version>1.0.1</version>
+			<version>1.1.1</version>
 			<scope>system</scope>
-			<systemPath>${basedir}/libs/jfx-tableview-filter-1.0.1-jar-with-dependencies.jar</systemPath>
+			<systemPath>${basedir}/libs/rhapsody-java-sdk-1.1.0-jar-with-dependencies.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>com.github.kaiwinter</groupId>
 			<artifactId>jfx-tableview-filter</artifactId>
-			<version>1.1.0</version>
+			<version>1.0.1</version>
 			<scope>system</scope>
-			<systemPath>${basedir}/libs/rhapsody-java-sdk-1.1.0-jar-with-dependencies.jar</systemPath>
+			<systemPath>${basedir}/libs/jfx-tableview-filter-1.0.1-jar-with-dependencies.jar</systemPath>
 		</dependency>
 
 		<!-- Testing -->
