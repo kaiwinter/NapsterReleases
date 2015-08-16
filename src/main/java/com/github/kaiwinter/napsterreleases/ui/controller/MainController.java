@@ -209,11 +209,17 @@ public final class MainController {
 			@Override
 			public void success(Collection<AlbumData> albums, Response response) {
 				LOGGER.info("Loaded {} albums", albums.size());
-				Platform.runLater(() -> {
-					clearDetailTabs();
-					newReleasesTabController.setNewReleases(albums);
-					newReleasesTabController.setLoading(false);
-				});
+				// Check if genre selection changed in the meantime
+				GenreData currentGenre = newReleasesTabController.getSelectedGenre();
+				if (currentGenre != null && currentGenre == genreData) {
+					Platform.runLater(() -> {
+						clearDetailTabs();
+						newReleasesTabController.setNewReleases(albums);
+						newReleasesTabController.setLoading(false);
+					});
+				} else {
+					LOGGER.info("Genre selection changed, not showing loaded data");
+				}
 			}
 
 			@Override

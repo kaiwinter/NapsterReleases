@@ -217,6 +217,14 @@ public final class NewReleasesTabController {
 		AlbumData selectedAlbum = releasesTv.getSelectionModel().getSelectedItem();
 		return selectedAlbum;
 	}
+	
+	public GenreData getSelectedGenre() {
+		TreeItem<GenreData> selectedItem = genreList.getSelectionModel().getSelectedItem();
+		if (selectedItem != null) {
+			return selectedItem.getValue();
+		}
+		return null;
+	}
 
 	public void setLoading(boolean loading) {
 		loadingIndicator.visibleProperty().set(loading);
