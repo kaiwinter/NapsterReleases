@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.image.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane fx:id="borderPane" prefHeight="780.0" prefWidth="922.0" xmlns="http://javafx.com/javafx/8.0.51" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.kaiwinter.napsterreleases.ui.controller.MainController">
+   <center>
+      <TabPane fx:id="tabPane">
+         <tabs>
+            <Tab closable="false" text="Genres: New Releases">
+               <content>
+      			<fx:include fx:id="newReleasesTab" source="newreleases_tab.fxml" />
+               </content>
+            </Tab>
+            <Tab fx:id="artistTabHandle" closable="false" text="Artist">
+               <content>
+               	<fx:include fx:id="artistTab" source="artist_tab.fxml" />
+               </content>
+            </Tab>
+            <Tab fx:id="albumTabHandle" closable="false" text="Album">
+               <content>
+               	<fx:include fx:id="albumTab" source="album_tab.fxml" />
+               </content>
+            </Tab>
+         </tabs>
+      </TabPane>
+   </center>
+</BorderPane>

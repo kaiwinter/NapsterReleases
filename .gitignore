@@ -1,0 +1,5 @@
+/target/
+/.settings/
+/.classpath
+/.project
+/src/main/resources/com/github/kaiwinter/napsterreleases/apikey.properties
