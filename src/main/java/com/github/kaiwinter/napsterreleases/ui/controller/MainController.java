@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import com.github.kaiwinter.napsterreleases.RhapsodyApiKeyConfig;
 import com.github.kaiwinter.napsterreleases.ui.callback.ActionRetryCallback;
+import com.github.kaiwinter.rhapsody.api.ArtistImageSize;
 import com.github.kaiwinter.rhapsody.api.AuthenticationCallback;
 import com.github.kaiwinter.rhapsody.api.RhapsodySdkWrapper;
 import com.github.kaiwinter.rhapsody.model.AccountData;
@@ -234,11 +235,11 @@ public final class MainController {
 		};
 
 		if (NewReleasesTabController.RHAPSODY_CURATED.equals(genreData.id)) {
-			rhapsodySdkWrapper.loadAlbumNewReleases(callback, null);
+			rhapsodySdkWrapper.loadAlbumNewReleases(null, callback);
 		} else if (NewReleasesTabController.RHAPSODY_PERSONALIZED.equals(genreData.id)) {
 			loadPersonalizedNewReleases(callback);
 		} else {
-			rhapsodySdkWrapper.loadGenreNewReleases(genreData.id, callback);
+			rhapsodySdkWrapper.loadGenreNewReleases(genreData.id, null, callback);
 		}
 	}
 
@@ -249,7 +250,7 @@ public final class MainController {
 				@Override
 				public void success(AccountData userAccountData, Response response) {
 					MainController.this.userAccountData = userAccountData;
-					rhapsodySdkWrapper.loadAlbumNewReleases(callback, userAccountData.id);
+					rhapsodySdkWrapper.loadAlbumNewReleases(userAccountData.id, callback);
 				}
 
 				@Override
@@ -260,14 +261,15 @@ public final class MainController {
 			};
 			rhapsodySdkWrapper.loadAccount(loadUserAccountCallback);
 		} else {
-			rhapsodySdkWrapper.loadAlbumNewReleases(callback, userAccountData.id);
+			rhapsodySdkWrapper.loadAlbumNewReleases(userAccountData.id, callback);
 		}
 	}
 
 	public void showArtist(String artistId) {
 		artistTabController.setLoading(true);
 
-		Image image = rhapsodySdkWrapper.loadArtistImage(artistId);
+		String imageUrl = rhapsodySdkWrapper.getArtistImageUrl(artistId, ArtistImageSize.SIZE_356_237);
+		Image image = new Image(imageUrl, true);
 		artistTabController.setArtistImage(image);
 
 		rhapsodySdkWrapper.loadArtistMeta(artistId, new Callback<ArtistData>() {
