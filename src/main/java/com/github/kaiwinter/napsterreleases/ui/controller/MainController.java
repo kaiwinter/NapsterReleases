@@ -14,6 +14,7 @@ import com.github.kaiwinter.napsterreleases.RhapsodyApiKeyConfig;
 import com.github.kaiwinter.napsterreleases.ui.callback.ActionRetryCallback;
 import com.github.kaiwinter.rhapsody.api.AuthenticationCallback;
 import com.github.kaiwinter.rhapsody.api.RhapsodySdkWrapper;
+import com.github.kaiwinter.rhapsody.model.AccountData;
 import com.github.kaiwinter.rhapsody.model.AlbumData;
 import com.github.kaiwinter.rhapsody.model.ArtistData;
 import com.github.kaiwinter.rhapsody.model.BioData;
@@ -44,7 +45,7 @@ public final class MainController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MainController.class.getSimpleName());
 
 	@FXML
-	public BorderPane borderPane;
+	private BorderPane borderPane;
 
 	@FXML
 	private TabPane tabPane;
@@ -66,7 +67,9 @@ public final class MainController {
 
 	private RhapsodySdkWrapper rhapsodySdkWrapper;
 
-	public NotificationPane notificationPane;
+	private NotificationPane notificationPane;
+
+	private AccountData userAccountData;
 
 	public MainController() throws IOException {
 		// Do this in constructor to get a better error output
@@ -84,7 +87,7 @@ public final class MainController {
 
 		addTabListeners();
 
-		showGenres();
+		loadGenres();
 	}
 
 	private void addTabListeners() {
@@ -182,8 +185,7 @@ public final class MainController {
 		albumTabController.clearData();
 	}
 
-	@FXML
-	public void showGenres() {
+	public void loadGenres() {
 		newReleasesTabController.setLoading(true);
 		rhapsodySdkWrapper.loadGenres(new Callback<Collection<GenreData>>() {
 
@@ -198,7 +200,7 @@ public final class MainController {
 			public void failure(RetrofitError error) {
 				newReleasesTabController.setLoading(false);
 				LOGGER.error("Error loading genres ({})", error.getMessage());
-				handleError(error, () -> showGenres());
+				handleError(error, () -> loadGenres());
 			}
 		});
 	}
@@ -232,9 +234,33 @@ public final class MainController {
 		};
 
 		if (NewReleasesTabController.RHAPSODY_CURATED.equals(genreData.id)) {
-			rhapsodySdkWrapper.loadAlbumNewReleases(callback);
+			rhapsodySdkWrapper.loadAlbumNewReleases(callback, null);
+		} else if (NewReleasesTabController.RHAPSODY_PERSONALIZED.equals(genreData.id)) {
+			loadPersonalizedNewReleases(callback);
 		} else {
 			rhapsodySdkWrapper.loadGenreNewReleases(genreData.id, callback);
+		}
+	}
+
+	private void loadPersonalizedNewReleases(Callback<Collection<AlbumData>> callback) {
+		if (userAccountData == null) {
+			Callback<AccountData> loadUserAccountCallback = new Callback<AccountData>() {
+
+				@Override
+				public void success(AccountData userAccountData, Response response) {
+					MainController.this.userAccountData = userAccountData;
+					rhapsodySdkWrapper.loadAlbumNewReleases(callback, userAccountData.id);
+				}
+
+				@Override
+				public void failure(RetrofitError error) {
+					LOGGER.error("Error loading account information ({})", error.getMessage());
+					callback.failure(error);
+				}
+			};
+			rhapsodySdkWrapper.loadAccount(loadUserAccountCallback);
+		} else {
+			rhapsodySdkWrapper.loadAlbumNewReleases(callback, userAccountData.id);
 		}
 	}
 

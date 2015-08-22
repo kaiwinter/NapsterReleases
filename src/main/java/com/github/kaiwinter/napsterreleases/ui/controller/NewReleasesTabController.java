@@ -29,6 +29,7 @@ import javafx.scene.layout.Region;
 public final class NewReleasesTabController {
 
 	static final String RHAPSODY_CURATED = "rhapsody_curated";
+	static final String RHAPSODY_PERSONALIZED = "rhapsody_personalized";
 
 	@FXML
 	private TreeView<GenreData> genreList;
@@ -79,7 +80,7 @@ public final class NewReleasesTabController {
 	@FXML
 	private void loadGenres() {
 		genreList.setRoot(null);
-		mainController.showGenres();
+		mainController.loadGenres();
 	}
 
 	@FXML
@@ -187,12 +188,17 @@ public final class NewReleasesTabController {
 	public void setGenres(Collection<GenreData> genres) {
 		Platform.runLater(() -> {
 			TreeItem<GenreData> root = new TreeItem<>();
-			GenreData dfa = new GenreData();
-			dfa.name = "< Rhapsody curated >";
-			dfa.id = RHAPSODY_CURATED;
-			dfa.description = "Releases curated by Rhapsody.";
-			TreeItem<GenreData> dummyForAll = new TreeItem<>(dfa);
-			root.getChildren().add(dummyForAll);
+			GenreData rhapsodyDummyGenre = new GenreData();
+			rhapsodyDummyGenre.name = "< Rhapsody curated >";
+			rhapsodyDummyGenre.id = RHAPSODY_CURATED;
+			rhapsodyDummyGenre.description = "Releases curated by Rhapsody.";
+			root.getChildren().add(new TreeItem<>(rhapsodyDummyGenre));
+
+			GenreData rhapsodyDummyGenre2 = new GenreData();
+			rhapsodyDummyGenre2.name = "< Rhapsody curated, personalized >";
+			rhapsodyDummyGenre2.id = RHAPSODY_PERSONALIZED;
+			rhapsodyDummyGenre2.description = "Personalized new releases based upon recent listening history.";
+			root.getChildren().add(new TreeItem<>(rhapsodyDummyGenre2));
 
 			for (GenreData genreData : genres) {
 				TreeItem<GenreData> treeViewItem = new TreeItem<>(genreData);
