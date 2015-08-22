@@ -12,6 +12,7 @@ import com.github.kaiwinter.rhapsody.model.GenreData;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValueBase;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TableColumn;
@@ -106,7 +107,8 @@ public final class NewReleasesTabController {
 		});
 
 		genreList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-			FilterSupport.clearItems(releasesTv);
+			ObservableList<? extends AlbumData> items = FilterSupport.getItems(releasesTv);
+			items.clear();
 			mainController.clearDetailTabs();
 
 			if (newValue == null) {
