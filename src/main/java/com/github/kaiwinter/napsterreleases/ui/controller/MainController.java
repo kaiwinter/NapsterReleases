@@ -20,6 +20,7 @@ import com.github.kaiwinter.rhapsody.model.AlbumData;
 import com.github.kaiwinter.rhapsody.model.ArtistData;
 import com.github.kaiwinter.rhapsody.model.BioData;
 import com.github.kaiwinter.rhapsody.model.GenreData;
+import com.github.kaiwinter.rhapsody.persistence.impl.PreferencesAuthorizationStore;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -75,7 +76,8 @@ public final class MainController {
 	public MainController() throws IOException {
 		// Do this in constructor to get a better error output
 		RhapsodyApiKeyConfig rhapsodyApiKeyConfig = new RhapsodyApiKeyConfig();
-		rhapsodySdkWrapper = new RhapsodySdkWrapper(rhapsodyApiKeyConfig.apiKey, rhapsodyApiKeyConfig.apiSecret);
+		rhapsodySdkWrapper = new RhapsodySdkWrapper(rhapsodyApiKeyConfig.apiKey, rhapsodyApiKeyConfig.apiSecret,
+				new PreferencesAuthorizationStore());
 	}
 
 	@FXML
