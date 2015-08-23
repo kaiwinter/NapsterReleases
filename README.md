@@ -14,4 +14,4 @@ and also
 - [ControlsFX](http://fxexperience.com/controlsfx/)
 
 ## Download
-[Download v1.0.2](https://github.com/kaiwinter/NapsterReleases/releases/download/v1.0.2/napster-releases-1.0.2.jar)
+[Download v1.0.3](https://github.com/kaiwinter/NapsterReleases/releases/download/v1.0.3/napster-releases-1.0.3.jar)
