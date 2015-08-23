@@ -1,7 +1,8 @@
 package com.github.kaiwinter.napsterreleases.util;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Utility class for time related conversions.
@@ -23,7 +24,11 @@ public final class TimeUtil {
 		if (timestamp == null) {
 			return "";
 		}
-		return new SimpleDateFormat("yyyy-MM-dd").format(new Date(timestamp));
+		Instant instant = Instant.ofEpochMilli(timestamp);
+		String format = DateTimeFormatter.ofPattern("yyyy-MM-dd") //
+				.withZone(ZoneId.systemDefault()) //
+				.format(instant);
+		return format;
 	}
 
 	/**
