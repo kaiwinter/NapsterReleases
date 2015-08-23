@@ -89,6 +89,12 @@ public final class MainController {
 		addTabListeners();
 
 		loadGenres();
+
+		Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> Platform.runLater(() -> {
+			LOGGER.error(throwable.getMessage(), throwable);
+			ExceptionDialog exceptionDialog = new ExceptionDialog(throwable);
+			exceptionDialog.show();
+		}));
 	}
 
 	private void addTabListeners() {
