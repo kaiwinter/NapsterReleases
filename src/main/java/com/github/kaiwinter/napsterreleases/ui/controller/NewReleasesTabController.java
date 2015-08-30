@@ -15,13 +15,15 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
 
 /**
@@ -121,15 +123,12 @@ public final class NewReleasesTabController {
 
 		releasesTv.getSelectionModel().selectedItemProperty()
 				.addListener((observable, oldValue, newValue) -> mainController.clearDetailTabs());
-		releasesTv.setRowFactory(tv -> {
-			TableRow<AlbumData> row = new TableRow<>();
-			row.setOnMouseClicked(event -> {
-				if (event.getClickCount() == 2 && (!row.isEmpty())) {
-					mainController.switchToAlbumTab();
-				}
-			});
-			return row;
-		});
+
+		setCellValueFactories();
+
+	}
+
+	private void setCellValueFactories() {
 
 		artistTc.setCellValueFactory(value -> new ObservableValueBase<String>() {
 			@Override
@@ -164,6 +163,30 @@ public final class NewReleasesTabController {
 			public String getValue() {
 				return String.valueOf(value.getValue().discCount);
 			}
+		});
+
+		artistTc.setCellFactory(param -> {
+			TableCell<AlbumData, String> tableCell = new TextFieldTableCell<>();
+
+			tableCell.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
+				if (event.getClickCount() == 2) {
+					mainController.switchToArtistTab();
+				}
+			});
+
+			return tableCell;
+		});
+
+		albumTc.setCellFactory(param -> {
+			TableCell<AlbumData, String> tableCell = new TextFieldTableCell<>();
+
+			tableCell.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
+				if (event.getClickCount() == 2) {
+					mainController.switchToAlbumTab();
+				}
+			});
+
+			return tableCell;
 		});
 	}
 

@@ -382,6 +382,10 @@ public final class MainController {
 		}
 	}
 
+	public void switchToArtistTab() {
+		tabPane.getSelectionModel().select(artistTabHandle);
+	}
+
 	public void switchToAlbumTab() {
 		tabPane.getSelectionModel().select(albumTabHandle);
 	}
