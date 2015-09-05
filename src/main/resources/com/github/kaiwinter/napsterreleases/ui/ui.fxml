@@ -25,6 +25,11 @@
                	<fx:include fx:id="albumTab" source="album_tab.fxml" />
                </content>
             </Tab>
+            <Tab fx:id="artistWatchlistTabHandle" closable="false" text="Watched Artists">
+               <content>
+               	<fx:include fx:id="artistWatchlistTab" source="artist_watchlist_tab.fxml" />
+               </content>
+            </Tab>
          </tabs>
       </TabPane>
    </center>

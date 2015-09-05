@@ -17,6 +17,7 @@ import com.github.kaiwinter.rhapsody.api.AuthenticationCallback;
 import com.github.kaiwinter.rhapsody.api.RhapsodySdkWrapper;
 import com.github.kaiwinter.rhapsody.model.AccountData;
 import com.github.kaiwinter.rhapsody.model.AlbumData;
+import com.github.kaiwinter.rhapsody.model.AlbumData.Artist;
 import com.github.kaiwinter.rhapsody.model.ArtistData;
 import com.github.kaiwinter.rhapsody.model.BioData;
 import com.github.kaiwinter.rhapsody.model.GenreData;
@@ -59,6 +60,9 @@ public final class MainController {
 	private Tab albumTabHandle;
 
 	@FXML
+	private Tab artistWatchlistTabHandle;
+
+	@FXML
 	private NewReleasesTabController newReleasesTabController;
 
 	@FXML
@@ -66,6 +70,9 @@ public final class MainController {
 
 	@FXML
 	private AlbumTabController albumTabController;
+
+	@FXML
+	private ArtistWatchlistTabController artistWatchlistTabController;
 
 	private RhapsodySdkWrapper rhapsodySdkWrapper;
 
@@ -78,6 +85,7 @@ public final class MainController {
 		RhapsodyApiKeyConfig rhapsodyApiKeyConfig = new RhapsodyApiKeyConfig();
 		rhapsodySdkWrapper = new RhapsodySdkWrapper(rhapsodyApiKeyConfig.apiKey, rhapsodyApiKeyConfig.apiSecret,
 				new PreferencesAuthorizationStore());
+		// rhapsodySdkWrapper.setVerboseLoggingEnabled(true);
 	}
 
 	@FXML
@@ -91,6 +99,9 @@ public final class MainController {
 		addTabListeners();
 
 		loadGenres();
+
+		artistWatchlistTabController.setRhapsodySdkWrapper(rhapsodySdkWrapper);
+		artistWatchlistTabController.loadWatchedArtists();
 
 		Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> Platform.runLater(() -> {
 			LOGGER.error(throwable.getMessage(), throwable);
@@ -382,11 +393,11 @@ public final class MainController {
 		}
 	}
 
-	public void switchToArtistTab() {
-		tabPane.getSelectionModel().select(artistTabHandle);
-	}
-
 	public void switchToAlbumTab() {
 		tabPane.getSelectionModel().select(albumTabHandle);
+	}
+
+	public void addArtistToWatchlist(Artist artist) {
+		artistWatchlistTabController.addArtistToWatchlist(artist);
 	}
 }
