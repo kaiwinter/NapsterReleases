@@ -1,19 +1,15 @@
 package com.github.kaiwinter.napsterreleases.ui.controller;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 import com.github.kaiwinter.jfx.tablecolumn.filter.FilterSupport;
 import com.github.kaiwinter.napsterreleases.UserSettings;
 import com.github.kaiwinter.napsterreleases.util.TimeUtil;
 import com.github.kaiwinter.rhapsody.model.AlbumData;
 import com.github.kaiwinter.rhapsody.model.GenreData;
 
-import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValueBase;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -24,7 +20,6 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TreeCell;
-import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.MouseEvent;
@@ -33,10 +28,7 @@ import javafx.scene.layout.Region;
 /**
  * Controller for the New Releases tab.
  */
-public final class NewReleasesTabController {
-
-	static final String RHAPSODY_CURATED = "rhapsody_curated";
-	static final String RHAPSODY_PERSONALIZED = "rhapsody_personalized";
+public final class NewReleasesTabView {
 
 	@FXML
 	private TreeView<GenreData> genreList;
@@ -66,11 +58,28 @@ public final class NewReleasesTabController {
 	private MainController mainController;
 
 	private UserSettings userSettings;
+	private NewReleasesTabViewModel viewModel;
 
 	@FXML
 	private void initialize() {
+		this.viewModel = new NewReleasesTabViewModel();
+		this.viewModel.genres().bindBidirectional(genreList.rootProperty());
+		this.viewModel.releases().bindBidirectional(releasesTv.itemsProperty());
+		this.viewModel.genreDescription().bindBidirectional(textArea.textProperty());
+
+		this.viewModel.selectedGenre().bind(genreList.getSelectionModel().selectedItemProperty());
+		this.viewModel.selectedAlbum().bind(releasesTv.getSelectionModel().selectedItemProperty());
+
+		this.viewModel.loadingProperty().bindBidirectional(loadingIndicator.visibleProperty());
+		this.viewModel.loadingProperty().bindBidirectional(loadingIndicatorBackground.visibleProperty());
+
 		userSettings = new UserSettings();
 		prepareUi();
+
+		SortedList<AlbumData> sorted = FXCollections.<AlbumData> observableArrayList().filtered(null).sorted();
+		releasesTv.setItems(sorted);
+		sorted.comparatorProperty().bind(releasesTv.comparatorProperty());
+		this.viewModel.releases().bindBidirectional(releasesTv.itemsProperty());
 
 		// Initial sort by release data
 		releasesTv.getSortOrder().add(releasedTc);
@@ -86,7 +95,6 @@ public final class NewReleasesTabController {
 
 	@FXML
 	private void loadGenres() {
-		genreList.setRoot(null);
 		mainController.loadGenres();
 	}
 
@@ -113,8 +121,7 @@ public final class NewReleasesTabController {
 		});
 
 		genreList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-			ObservableList<? extends AlbumData> items = FilterSupport.getItems(releasesTv);
-			items.clear();
+			FilterSupport.getItems(releasesTv).clear();
 			mainController.clearDetailTabs();
 
 			if (newValue == null) {
@@ -223,64 +230,7 @@ public final class NewReleasesTabController {
 		this.mainController = mainController;
 	}
 
-	public void setGenres(Collection<GenreData> genres) {
-		Platform.runLater(() -> {
-			TreeItem<GenreData> root = new TreeItem<>();
-			GenreData rhapsodyDummyGenre = new GenreData();
-			rhapsodyDummyGenre.name = "< Rhapsody curated >";
-			rhapsodyDummyGenre.id = RHAPSODY_CURATED;
-			rhapsodyDummyGenre.description = "Releases curated by Rhapsody.";
-			root.getChildren().add(new TreeItem<>(rhapsodyDummyGenre));
-
-			GenreData rhapsodyDummyGenre2 = new GenreData();
-			rhapsodyDummyGenre2.name = "< Rhapsody curated, personalized >";
-			rhapsodyDummyGenre2.id = RHAPSODY_PERSONALIZED;
-			rhapsodyDummyGenre2.description = "Personalized new releases based upon recent listening history.";
-			root.getChildren().add(new TreeItem<>(rhapsodyDummyGenre2));
-
-			for (GenreData genreData : genres) {
-				TreeItem<GenreData> treeViewItem = new TreeItem<>(genreData);
-				root.getChildren().add(treeViewItem);
-				if (genreData.subgenres != null) {
-					for (GenreData subgenre : genreData.subgenres) {
-						treeViewItem.getChildren().add(new TreeItem<>(subgenre));
-					}
-				}
-			}
-
-			genreList.setRoot(root);
-		});
-	}
-
-	public void setNewReleases(Collection<AlbumData> albums) {
-		ArrayList<TableColumn<AlbumData, ?>> savesSortOrder = new ArrayList<>(releasesTv.getSortOrder());
-		releasesTv.setItems(FXCollections.observableArrayList(albums));
-		releasesTv.getSortOrder().addAll(savesSortOrder);
-
-		// Refresh sort
-		releasesTv.sort();
-	}
-
-	public void clearData() {
-		genreList.setRoot(null);
-		releasesTv.getItems().clear();
-	}
-
-	public AlbumData getSelectedAlbum() {
-		AlbumData selectedAlbum = releasesTv.getSelectionModel().getSelectedItem();
-		return selectedAlbum;
-	}
-
-	public GenreData getSelectedGenre() {
-		TreeItem<GenreData> selectedItem = genreList.getSelectionModel().getSelectedItem();
-		if (selectedItem != null) {
-			return selectedItem.getValue();
-		}
-		return null;
-	}
-
-	public void setLoading(boolean loading) {
-		loadingIndicator.visibleProperty().set(loading);
-		loadingIndicatorBackground.visibleProperty().set(loading);
+	public NewReleasesTabViewModel getViewModel() {
+		return viewModel;
 	}
 }

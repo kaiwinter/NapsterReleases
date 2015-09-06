@@ -16,6 +16,7 @@ import org.controlsfx.dialog.LoginDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.kaiwinter.jfx.tablecolumn.filter.FilterSupport;
 import com.github.kaiwinter.napsterreleases.RhapsodyApiKeyConfig;
 import com.github.kaiwinter.napsterreleases.UserSettings;
 import com.github.kaiwinter.napsterreleases.ui.callback.ActionRetryCallback;
@@ -45,6 +46,7 @@ import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TreeItem;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
@@ -59,6 +61,9 @@ import retrofit.client.Response;
  */
 public final class MainController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MainController.class.getSimpleName());
+
+	private static final String RHAPSODY_CURATED = "rhapsody_curated";
+	private static final String RHAPSODY_PERSONALIZED = "rhapsody_personalized";
 
 	@FXML
 	private BorderPane borderPane;
@@ -76,7 +81,7 @@ public final class MainController {
 	private Tab artistWatchlistTabHandle;
 
 	@FXML
-	private NewReleasesTabController newReleasesTabController;
+	private NewReleasesTabView newReleasesTabController;
 
 	@FXML
 	private ArtistTabView artistTabController;
@@ -134,7 +139,7 @@ public final class MainController {
 	private void addTabListeners() {
 		artistTabHandle.setOnSelectionChanged(event -> {
 			if (artistTabHandle.isSelected()) {
-				AlbumData albumData = newReleasesTabController.getSelectedAlbum();
+				AlbumData albumData = newReleasesTabController.getViewModel().selectedAlbum().get();
 				if (albumData != null) {
 					showArtist(albumData.artist.id);
 				}
@@ -143,7 +148,7 @@ public final class MainController {
 
 		albumTabHandle.setOnSelectionChanged(event -> {
 			if (albumTabHandle.isSelected()) {
-				AlbumData albumData = newReleasesTabController.getSelectedAlbum();
+				AlbumData albumData = newReleasesTabController.getViewModel().selectedAlbum().get();
 				if (albumData != null) {
 					showAlbum(albumData.id);
 				}
@@ -221,24 +226,25 @@ public final class MainController {
 
 	public void logout() {
 		rhapsodySdkWrapper.clearAuthorization();
-		newReleasesTabController.clearData();
+		newReleasesTabController.getViewModel().clearData();
 		clearDetailTabs();
 	}
 
 	public void loadGenres() {
-		newReleasesTabController.setLoading(true);
+		newReleasesTabController.getViewModel().clearData();
+		newReleasesTabController.getViewModel().loadingProperty().set(true);
 		rhapsodySdkWrapper.loadGenres(new Callback<Collection<GenreData>>() {
 
 			@Override
 			public void success(Collection<GenreData> genres, Response response) {
 				LOGGER.info("Loaded {} genres", genres.size());
-				newReleasesTabController.setGenres(genres);
-				newReleasesTabController.setLoading(false);
+				setGenres(genres);
+				newReleasesTabController.getViewModel().loadingProperty().set(false);
 			}
 
 			@Override
 			public void failure(RetrofitError error) {
-				newReleasesTabController.setLoading(false);
+				newReleasesTabController.getViewModel().loadingProperty().set(false);
 				LOGGER.error("Error loading genres ({})", error.getMessage());
 				handleError(error, () -> loadGenres());
 			}
@@ -246,19 +252,19 @@ public final class MainController {
 	}
 
 	public void showNewReleases(GenreData genreData) {
-		newReleasesTabController.setLoading(true);
+		newReleasesTabController.getViewModel().loadingProperty().set(true);
 		Callback<Collection<AlbumData>> callback = new Callback<Collection<AlbumData>>() {
 
 			@Override
 			public void success(Collection<AlbumData> albums, Response response) {
 				LOGGER.info("Loaded {} albums", albums.size());
 				// Check if genre selection changed in the meantime
-				GenreData currentGenre = newReleasesTabController.getSelectedGenre();
+				GenreData currentGenre = newReleasesTabController.getViewModel().selectedGenre().get().getValue();
 				if (currentGenre != null && currentGenre == genreData) {
 					Platform.runLater(() -> {
 						clearDetailTabs();
-						newReleasesTabController.setNewReleases(albums);
-						newReleasesTabController.setLoading(false);
+						setNewReleases(albums);
+						newReleasesTabController.getViewModel().loadingProperty().set(false);
 					});
 				} else {
 					LOGGER.info("Genre selection changed, not showing loaded data");
@@ -267,15 +273,15 @@ public final class MainController {
 
 			@Override
 			public void failure(RetrofitError error) {
-				newReleasesTabController.setLoading(false);
+				newReleasesTabController.getViewModel().loadingProperty().set(false);
 				LOGGER.error("Error loading albums ({})", error.getMessage());
 				handleError(error, () -> showNewReleases(genreData));
 			}
 		};
 
-		if (NewReleasesTabController.RHAPSODY_CURATED.equals(genreData.id)) {
+		if (RHAPSODY_CURATED.equals(genreData.id)) {
 			rhapsodySdkWrapper.loadAlbumNewReleases(null, callback);
-		} else if (NewReleasesTabController.RHAPSODY_PERSONALIZED.equals(genreData.id)) {
+		} else if (RHAPSODY_PERSONALIZED.equals(genreData.id)) {
 			loadPersonalizedNewReleases(callback);
 		} else {
 			rhapsodySdkWrapper.loadGenreNewReleases(genreData.id, null, callback);
@@ -504,5 +510,40 @@ public final class MainController {
 		userSettings.saveWatchedArtists(Collections.emptySet());
 
 		loadArtistWatchlist();
+	}
+
+	private void setGenres(Collection<GenreData> genres) {
+		Platform.runLater(() -> {
+			TreeItem<GenreData> root = new TreeItem<>();
+			GenreData rhapsodyDummyGenre = new GenreData();
+			rhapsodyDummyGenre.name = "< Rhapsody curated >";
+			rhapsodyDummyGenre.id = RHAPSODY_CURATED;
+			rhapsodyDummyGenre.description = "Releases curated by Rhapsody.";
+			root.getChildren().add(new TreeItem<>(rhapsodyDummyGenre));
+
+			GenreData rhapsodyDummyGenre2 = new GenreData();
+			rhapsodyDummyGenre2.name = "< Rhapsody curated, personalized >";
+			rhapsodyDummyGenre2.id = RHAPSODY_PERSONALIZED;
+			rhapsodyDummyGenre2.description = "Personalized new releases based upon recent listening history.";
+			root.getChildren().add(new TreeItem<>(rhapsodyDummyGenre2));
+
+			for (GenreData genreData : genres) {
+				TreeItem<GenreData> treeViewItem = new TreeItem<>(genreData);
+				root.getChildren().add(treeViewItem);
+				if (genreData.subgenres != null) {
+					for (GenreData subgenre : genreData.subgenres) {
+						treeViewItem.getChildren().add(new TreeItem<>(subgenre));
+					}
+				}
+			}
+
+			newReleasesTabController.getViewModel().genres().set(root);
+		});
+	}
+
+	private void setNewReleases(Collection<AlbumData> albums) {
+		ObservableList<AlbumData> items = (ObservableList<AlbumData>) FilterSupport
+				.getUnwrappedList(newReleasesTabController.getViewModel().releases().get());
+		items.setAll(albums);
 	}
 }
