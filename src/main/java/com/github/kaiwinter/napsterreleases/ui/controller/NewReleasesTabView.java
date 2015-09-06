@@ -1,7 +1,6 @@
 package com.github.kaiwinter.napsterreleases.ui.controller;
 
 import com.github.kaiwinter.jfx.tablecolumn.filter.FilterSupport;
-import com.github.kaiwinter.napsterreleases.UserSettings;
 import com.github.kaiwinter.napsterreleases.util.TimeUtil;
 import com.github.kaiwinter.rhapsody.model.AlbumData;
 import com.github.kaiwinter.rhapsody.model.GenreData;
@@ -57,29 +56,33 @@ public final class NewReleasesTabView {
 
 	private MainController mainController;
 
-	private UserSettings userSettings;
 	private NewReleasesTabViewModel viewModel;
 
 	@FXML
 	private void initialize() {
-		this.viewModel = new NewReleasesTabViewModel();
-		this.viewModel.genres().bindBidirectional(genreList.rootProperty());
-		this.viewModel.releases().bindBidirectional(releasesTv.itemsProperty());
-		this.viewModel.genreDescription().bindBidirectional(textArea.textProperty());
+		viewModel = new NewReleasesTabViewModel();
+		viewModel.genresProperty().bindBidirectional(genreList.rootProperty());
+		viewModel.releasesProperty().bindBidirectional(releasesTv.itemsProperty());
+		viewModel.genreDescriptionProperty().bindBidirectional(textArea.textProperty());
 
-		this.viewModel.selectedGenre().bind(genreList.getSelectionModel().selectedItemProperty());
-		this.viewModel.selectedAlbum().bind(releasesTv.getSelectionModel().selectedItemProperty());
+		viewModel.selectedGenreProperty().bind(genreList.getSelectionModel().selectedItemProperty());
+		viewModel.selectedAlbumProperty().bind(releasesTv.getSelectionModel().selectedItemProperty());
 
-		this.viewModel.loadingProperty().bindBidirectional(loadingIndicator.visibleProperty());
-		this.viewModel.loadingProperty().bindBidirectional(loadingIndicatorBackground.visibleProperty());
+		viewModel.loadingProperty().bindBidirectional(loadingIndicator.visibleProperty());
+		viewModel.loadingProperty().bindBidirectional(loadingIndicatorBackground.visibleProperty());
 
-		userSettings = new UserSettings();
+		viewModel.artistColumVisibleProperty().bindBidirectional(artistTc.visibleProperty());
+		viewModel.albumColumVisibleProperty().bindBidirectional(albumTc.visibleProperty());
+		viewModel.releasedColumVisibleProperty().bindBidirectional(releasedTc.visibleProperty());
+		viewModel.typeColumVisibleProperty().bindBidirectional(typeTc.visibleProperty());
+		viewModel.discsColumVisibleProperty().bindBidirectional(discsTc.visibleProperty());
+
 		prepareUi();
 
 		SortedList<AlbumData> sorted = FXCollections.<AlbumData> observableArrayList().filtered(null).sorted();
 		releasesTv.setItems(sorted);
 		sorted.comparatorProperty().bind(releasesTv.comparatorProperty());
-		this.viewModel.releases().bindBidirectional(releasesTv.itemsProperty());
+		viewModel.releasesProperty().bindBidirectional(releasesTv.itemsProperty());
 
 		// Initial sort by release data
 		releasesTv.getSortOrder().add(releasedTc);
@@ -88,9 +91,6 @@ public final class NewReleasesTabView {
 		FilterSupport.addFilter(albumTc);
 		FilterSupport.addFilter(releasedTc);
 		FilterSupport.addFilter(typeTc);
-
-		loadColumnVisibility();
-		addColumnVisibilityListeners();
 	}
 
 	@FXML
@@ -208,22 +208,6 @@ public final class NewReleasesTabView {
 
 			return tableCell;
 		});
-	}
-
-	private void loadColumnVisibility() {
-		// artistTc.setVisible(userSettings.getArtistColumnVisible());
-		albumTc.setVisible(userSettings.isAlbumColumnVisible());
-		releasedTc.setVisible(userSettings.isReleasedColumnVisible());
-		typeTc.setVisible(userSettings.isTypeColumnVisible());
-		discsTc.setVisible(userSettings.isDiscColumnVisible());
-	}
-
-	private void addColumnVisibilityListeners() {
-		artistTc.visibleProperty().addListener((observable, oldValue, newValue) -> userSettings.setArtistColumnVisible(newValue));
-		albumTc.visibleProperty().addListener((observable, oldValue, newValue) -> userSettings.setAlbumColumnVisible(newValue));
-		releasedTc.visibleProperty().addListener((observable, oldValue, newValue) -> userSettings.setReleasedColumnVisible(newValue));
-		typeTc.visibleProperty().addListener((observable, oldValue, newValue) -> userSettings.setTypeColumnVisible(newValue));
-		discsTc.visibleProperty().addListener((observable, oldValue, newValue) -> userSettings.setDiscColumnVisible(newValue));
 	}
 
 	public void setMainController(MainController mainController) {

@@ -127,6 +127,9 @@ public final class MainController {
 
 		loadGenres();
 
+		loadColumnVisibility();
+		addColumnVisibilityListeners();
+
 		loadArtistWatchlist();
 
 		Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> Platform.runLater(() -> {
@@ -139,7 +142,7 @@ public final class MainController {
 	private void addTabListeners() {
 		artistTabHandle.setOnSelectionChanged(event -> {
 			if (artistTabHandle.isSelected()) {
-				AlbumData albumData = newReleasesTabController.getViewModel().selectedAlbum().get();
+				AlbumData albumData = newReleasesTabController.getViewModel().selectedAlbumProperty().get();
 				if (albumData != null) {
 					showArtist(albumData.artist.id);
 				}
@@ -148,7 +151,7 @@ public final class MainController {
 
 		albumTabHandle.setOnSelectionChanged(event -> {
 			if (albumTabHandle.isSelected()) {
-				AlbumData albumData = newReleasesTabController.getViewModel().selectedAlbum().get();
+				AlbumData albumData = newReleasesTabController.getViewModel().selectedAlbumProperty().get();
 				if (albumData != null) {
 					showAlbum(albumData.id);
 				}
@@ -259,7 +262,7 @@ public final class MainController {
 			public void success(Collection<AlbumData> albums, Response response) {
 				LOGGER.info("Loaded {} albums", albums.size());
 				// Check if genre selection changed in the meantime
-				GenreData currentGenre = newReleasesTabController.getViewModel().selectedGenre().get().getValue();
+				GenreData currentGenre = newReleasesTabController.getViewModel().selectedGenreProperty().get().getValue();
 				if (currentGenre != null && currentGenre == genreData) {
 					Platform.runLater(() -> {
 						clearDetailTabs();
@@ -537,13 +540,32 @@ public final class MainController {
 				}
 			}
 
-			newReleasesTabController.getViewModel().genres().set(root);
+			newReleasesTabController.getViewModel().genresProperty().set(root);
 		});
 	}
 
 	private void setNewReleases(Collection<AlbumData> albums) {
 		ObservableList<AlbumData> items = (ObservableList<AlbumData>) FilterSupport
-				.getUnwrappedList(newReleasesTabController.getViewModel().releases().get());
+				.getUnwrappedList(newReleasesTabController.getViewModel().releasesProperty().get());
 		items.setAll(albums);
+	}
+
+	private void loadColumnVisibility() {
+		// artistTc.setVisible(userSettings.getArtistColumnVisible());
+		newReleasesTabController.getViewModel().artistColumVisibleProperty().set(userSettings.isAlbumColumnVisible());
+		newReleasesTabController.getViewModel().albumColumVisibleProperty().set(userSettings.isReleasedColumnVisible());
+		newReleasesTabController.getViewModel().typeColumVisibleProperty().set(userSettings.isTypeColumnVisible());
+		newReleasesTabController.getViewModel().discsColumVisibleProperty().set(userSettings.isDiscColumnVisible());
+	}
+
+	private void addColumnVisibilityListeners() {
+		NewReleasesTabViewModel viewModel = newReleasesTabController.getViewModel();
+		viewModel.artistColumVisibleProperty()
+				.addListener((observable, oldValue, newValue) -> userSettings.setArtistColumnVisible(newValue));
+		viewModel.albumColumVisibleProperty().addListener((observable, oldValue, newValue) -> userSettings.setAlbumColumnVisible(newValue));
+		viewModel.releasedColumVisibleProperty()
+				.addListener((observable, oldValue, newValue) -> userSettings.setReleasedColumnVisible(newValue));
+		viewModel.typeColumVisibleProperty().addListener((observable, oldValue, newValue) -> userSettings.setTypeColumnVisible(newValue));
+		viewModel.discsColumVisibleProperty().addListener((observable, oldValue, newValue) -> userSettings.setDiscColumnVisible(newValue));
 	}
 }

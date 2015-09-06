@@ -24,19 +24,25 @@ public final class NewReleasesTabViewModel {
 	private ObjectProperty<TreeItem<GenreData>> selectedGenre = new SimpleObjectProperty<>();
 	private ObjectProperty<AlbumData> selectedAlbum = new SimpleObjectProperty<>();
 
+	private BooleanProperty artistColumVisible = new SimpleBooleanProperty();
+	private BooleanProperty albumColumVisible = new SimpleBooleanProperty();
+	private BooleanProperty releasedColumVisible = new SimpleBooleanProperty();
+	private BooleanProperty typeColumVisible = new SimpleBooleanProperty();
+	private BooleanProperty discsColumVisible = new SimpleBooleanProperty();
+
 	public BooleanProperty loadingProperty() {
 		return this.loading;
 	}
 
-	public ObjectProperty<TreeItem<GenreData>> genres() {
+	public ObjectProperty<TreeItem<GenreData>> genresProperty() {
 		return this.genres;
 	}
 
-	public ListProperty<AlbumData> releases() {
+	public ListProperty<AlbumData> releasesProperty() {
 		return this.releases;
 	}
 
-	public StringProperty genreDescription() {
+	public StringProperty genreDescriptionProperty() {
 		return this.genreDescription;
 	}
 
@@ -46,11 +52,31 @@ public final class NewReleasesTabViewModel {
 		genreDescription.set(null);
 	}
 
-	public ObjectProperty<TreeItem<GenreData>> selectedGenre() {
+	public ObjectProperty<TreeItem<GenreData>> selectedGenreProperty() {
 		return this.selectedGenre;
 	}
 
-	public ObjectProperty<AlbumData> selectedAlbum() {
+	public ObjectProperty<AlbumData> selectedAlbumProperty() {
 		return this.selectedAlbum;
+	}
+
+	public BooleanProperty artistColumVisibleProperty() {
+		return this.artistColumVisible;
+	}
+
+	public BooleanProperty albumColumVisibleProperty() {
+		return this.albumColumVisible;
+	}
+
+	public BooleanProperty releasedColumVisibleProperty() {
+		return this.releasedColumVisible;
+	}
+
+	public BooleanProperty typeColumVisibleProperty() {
+		return this.typeColumVisible;
+	}
+
+	public BooleanProperty discsColumVisibleProperty() {
+		return this.discsColumVisible;
 	}
 }
