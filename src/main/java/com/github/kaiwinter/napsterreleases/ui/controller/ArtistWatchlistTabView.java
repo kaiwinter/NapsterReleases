@@ -39,18 +39,18 @@ public final class ArtistWatchlistTabView {
 	@FXML
 	private Region loadingIndicatorBackground;
 
-	private ArtistWatchlistTabViewModel ViewModel;
+	private ArtistWatchlistTabViewModel viewModel;
 
 	private MainController mainController;
 
 	@FXML
 	private void initialize() {
-		this.ViewModel = new ArtistWatchlistTabViewModel();
+		this.viewModel = new ArtistWatchlistTabViewModel();
 
 		SortedList<WatchedArtist> sortedList = new SortedList<>(FXCollections.observableArrayList());
 		artistsTv.setItems(sortedList);
 		sortedList.comparatorProperty().bind(artistsTv.comparatorProperty());
-		this.ViewModel.watchedArtists().bindBidirectional(artistsTv.itemsProperty());
+		this.viewModel.watchedArtists().bindBidirectional(artistsTv.itemsProperty());
 
 		artistsTv.getSortOrder().add(artistTc);
 
@@ -106,7 +106,7 @@ public final class ArtistWatchlistTabView {
 	}
 
 	public ArtistWatchlistTabViewModel getViewModel() {
-		return ViewModel;
+		return viewModel;
 	}
 
 	public void setMainController(MainController mainController) {
