@@ -6,7 +6,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<StackPane xmlns="http://javafx.com/javafx/8.0.51" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.kaiwinter.napsterreleases.ui.controller.ArtistTabController">
+<StackPane xmlns="http://javafx.com/javafx/8.0.51" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.kaiwinter.napsterreleases.ui.controller.ArtistTabView">
    <children>
       <GridPane hgap="5.0" vgap="5.0">
         <columnConstraints>

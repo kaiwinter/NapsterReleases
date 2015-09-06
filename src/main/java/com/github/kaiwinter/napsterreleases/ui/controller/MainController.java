@@ -2,7 +2,13 @@ package com.github.kaiwinter.napsterreleases.ui.controller;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import org.controlsfx.control.NotificationPane;
 import org.controlsfx.dialog.ExceptionDialog;
@@ -11,7 +17,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.kaiwinter.napsterreleases.RhapsodyApiKeyConfig;
+import com.github.kaiwinter.napsterreleases.UserSettings;
 import com.github.kaiwinter.napsterreleases.ui.callback.ActionRetryCallback;
+import com.github.kaiwinter.napsterreleases.ui.model.WatchedArtist;
+import com.github.kaiwinter.napsterreleases.ui.model.WatchedArtist.LastRelease;
+import com.github.kaiwinter.napsterreleases.util.TimeUtil;
 import com.github.kaiwinter.rhapsody.api.ArtistImageSize;
 import com.github.kaiwinter.rhapsody.api.AuthenticationCallback;
 import com.github.kaiwinter.rhapsody.api.RhapsodySdkWrapper;
@@ -24,6 +34,9 @@ import com.github.kaiwinter.rhapsody.model.GenreData;
 import com.github.kaiwinter.rhapsody.persistence.impl.PreferencesAuthorizationStore;
 
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -66,13 +79,13 @@ public final class MainController {
 	private NewReleasesTabController newReleasesTabController;
 
 	@FXML
-	private ArtistTabController artistTabController;
+	private ArtistTabView artistTabController;
 
 	@FXML
-	private AlbumTabController albumTabController;
+	private AlbumTabView albumTabController;
 
 	@FXML
-	private ArtistWatchlistTabController artistWatchlistTabController;
+	private ArtistWatchlistTabView artistWatchlistTabController;
 
 	private RhapsodySdkWrapper rhapsodySdkWrapper;
 
@@ -80,17 +93,26 @@ public final class MainController {
 
 	private AccountData userAccountData;
 
+	private UserSettings userSettings;
+
+	/**
+	 * Caches the last release of an artist.
+	 */
+	private Map<String, LastRelease> artistId2ReleaseDateCache = new HashMap<>();
+
 	public MainController() throws IOException {
 		// Do this in constructor to get a better error output
 		RhapsodyApiKeyConfig rhapsodyApiKeyConfig = new RhapsodyApiKeyConfig();
 		rhapsodySdkWrapper = new RhapsodySdkWrapper(rhapsodyApiKeyConfig.apiKey, rhapsodyApiKeyConfig.apiSecret,
 				new PreferencesAuthorizationStore());
 		// rhapsodySdkWrapper.setVerboseLoggingEnabled(true);
+		this.userSettings = new UserSettings();
 	}
 
 	@FXML
 	private void initialize() {
 		newReleasesTabController.setMainController(this);
+		artistWatchlistTabController.setMainController(this);
 
 		notificationPane = new NotificationPane(borderPane.getCenter());
 		notificationPane.getStyleClass().add(NotificationPane.STYLE_CLASS_DARK);
@@ -100,8 +122,7 @@ public final class MainController {
 
 		loadGenres();
 
-		artistWatchlistTabController.setRhapsodySdkWrapper(rhapsodySdkWrapper);
-		artistWatchlistTabController.loadWatchedArtists();
+		loadArtistWatchlist();
 
 		Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> Platform.runLater(() -> {
 			LOGGER.error(throwable.getMessage(), throwable);
@@ -201,8 +222,7 @@ public final class MainController {
 	public void logout() {
 		rhapsodySdkWrapper.clearAuthorization();
 		newReleasesTabController.clearData();
-		artistTabController.clearData();
-		albumTabController.clearData();
+		clearDetailTabs();
 	}
 
 	public void loadGenres() {
@@ -285,17 +305,19 @@ public final class MainController {
 	}
 
 	public void showArtist(String artistId) {
-		artistTabController.setLoading(true);
+		ArtistTabViewModel artistTabViewModel = artistTabController.getViewModel();
+
+		artistTabViewModel.loadingProperty().set(true);
 
 		String imageUrl = rhapsodySdkWrapper.getArtistImageUrl(artistId, ArtistImageSize.SIZE_356_237);
 		Image image = new Image(imageUrl, true);
-		artistTabController.setArtistImage(image);
+		artistTabViewModel.imageProperty().set(image);
 
 		rhapsodySdkWrapper.loadArtistMeta(artistId, new Callback<ArtistData>() {
 			@Override
 			public void success(ArtistData artistData, Response response) {
 				LOGGER.info("Loaded artist '{}'", artistData.name);
-				artistTabController.setArtist(artistData);
+				artistTabViewModel.nameProperty().set(artistData.name);
 			}
 
 			@Override
@@ -309,13 +331,15 @@ public final class MainController {
 			@Override
 			public void success(BioData bio, Response response) {
 				LOGGER.info("Loaded bio, empty: {}, blurbs #: {}", bio.bio.isEmpty(), bio.blurbs.size());
-				artistTabController.setBio(bio);
-				artistTabController.setLoading(false);
+				String blurbs = bio.blurbs.stream().collect(Collectors.joining(",\n"));
+				artistTabViewModel.bioProperty().set(bio.bio);
+				artistTabViewModel.blubsProperty().set(blurbs);
+				artistTabViewModel.loadingProperty().set(false);
 			}
 
 			@Override
 			public void failure(RetrofitError error) {
-				artistTabController.setLoading(false);
+				artistTabViewModel.loadingProperty().set(false);
 				LOGGER.error("Error loading bio ({})", error.getMessage());
 				handleError(error, () -> showArtist(artistId));
 			}
@@ -323,19 +347,19 @@ public final class MainController {
 	}
 
 	public void showAlbum(String albumId) {
-		albumTabController.setLoading(true);
+		albumTabController.getViewModel().loadingProperty().set(true);
 		rhapsodySdkWrapper.loadAlbum(albumId, new Callback<AlbumData>() {
 
 			@Override
 			public void success(AlbumData albumData, Response response) {
 				LOGGER.info("Loaded album '{}'", albumData.name);
-				albumTabController.setAlbum(albumData);
-				albumTabController.setLoading(false);
+				albumTabController.getViewModel().setAlbum(albumData);
+				albumTabController.getViewModel().loadingProperty().set(false);
 			}
 
 			@Override
 			public void failure(RetrofitError error) {
-				albumTabController.setLoading(false);
+				albumTabController.getViewModel().loadingProperty().set(false);
 				LOGGER.error("Error loading album ({})", error.getMessage());
 				handleError(error, () -> showAlbum(albumId));
 			}
@@ -343,8 +367,8 @@ public final class MainController {
 	}
 
 	public void clearDetailTabs() {
-		artistTabController.clearData();
-		albumTabController.clearData();
+		artistTabController.getViewModel().clear();
+		albumTabController.getViewModel().clear();
 	}
 
 	private void showAutoHidingNotification(String icon, String text) {
@@ -401,7 +425,84 @@ public final class MainController {
 		tabPane.getSelectionModel().select(albumTabHandle);
 	}
 
-	public void addArtistToWatchlist(Artist artist) {
-		artistWatchlistTabController.addArtistToWatchlist(artist);
+	private void loadArtistWatchlist() {
+		Set<Artist> artists = userSettings.loadWatchedArtists();
+
+		Set<WatchedArtist> watchedArtists = artists.stream().map(artist -> new WatchedArtist(artist)).collect(Collectors.toSet());
+		ObservableList<WatchedArtist> sortedList = artistWatchlistTabController.getViewModel().watchedArtists().get();
+		ObservableList<WatchedArtist> sourceList = (ObservableList<WatchedArtist>) ((SortedList<WatchedArtist>) sortedList).getSource();
+		sourceList.setAll(watchedArtists);
+
+		loadReleaseDates();
+	}
+
+	private void loadReleaseDates() {
+
+		Task<Void> task = new Task<Void>() {
+			@Override
+			protected Void call() throws Exception {
+				ObservableList<WatchedArtist> observableWatchedArtists = FXCollections.emptyObservableList();// artistsTv.getItems();
+				for (WatchedArtist watchedArtist : observableWatchedArtists) {
+					watchedArtist.lastRelease = artistId2ReleaseDateCache.get(watchedArtist.artist.id);
+
+					if (watchedArtist.lastRelease == null) {
+						Collection<AlbumData> artistNewReleases = rhapsodySdkWrapper.getArtistNewReleases(watchedArtist.artist.id, 1);
+						if (artistNewReleases.size() > 0) {
+							AlbumData albumData = artistNewReleases.iterator().next();
+							watchedArtist.lastRelease = new LastRelease();
+							watchedArtist.lastRelease.date = TimeUtil.timestampToString(albumData.released);
+							watchedArtist.lastRelease.albumName = albumData.name;
+							artistId2ReleaseDateCache.put(watchedArtist.artist.id, watchedArtist.lastRelease);
+						}
+					}
+					// FIXME KW: Hack needed for JDK < 8.60
+					// https://bugs.openjdk.java.net/browse/JDK-8098235
+					// Platform.runLater(() -> {
+					// artistsTv.getColumns().get(2).setVisible(false);
+					// artistsTv.getColumns().get(2).setVisible(true);
+					// });
+				}
+				return null;
+			}
+
+			@Override
+			protected void done() {
+				try {
+					if (!isCancelled())
+						get();
+				} catch (ExecutionException e) {
+					LOGGER.error(e.getMessage(), e);
+				} catch (InterruptedException e) {
+					LOGGER.error(e.getMessage(), e);
+				}
+			}
+		};
+		new Thread(task).start();
+	}
+
+	public void removeArtistFromWatchlist(WatchedArtist selectedArtist) {
+		Set<Artist> watchedArtists = userSettings.loadWatchedArtists();
+		watchedArtists = watchedArtists.stream().filter(artist -> !selectedArtist.artist.id.equals(artist.id)).collect(Collectors.toSet());
+		userSettings.saveWatchedArtists(watchedArtists);
+
+		loadArtistWatchlist();
+	}
+
+	public void addArtistToWatchlist(Artist artistToWatch) {
+		Set<Artist> watchedArtists = userSettings.loadWatchedArtists();
+
+		boolean alreadyAdded = watchedArtists.stream().anyMatch(artist -> artistToWatch.id.equals(artist.id));
+		if (!alreadyAdded) {
+			watchedArtists.add(artistToWatch);
+			userSettings.saveWatchedArtists(watchedArtists);
+
+			loadArtistWatchlist();
+		}
+	}
+
+	public void clearArtistWatchlist() {
+		userSettings.saveWatchedArtists(Collections.emptySet());
+
+		loadArtistWatchlist();
 	}
 }
