@@ -92,9 +92,10 @@ public final class MainController {
 	@FXML
 	private ArtistWatchlistTabView artistWatchlistTabController;
 
-	private RhapsodySdkWrapper rhapsodySdkWrapper;
-
+	@FXML
 	private NotificationPane notificationPane;
+
+	private RhapsodySdkWrapper rhapsodySdkWrapper;
 
 	private AccountData userAccountData;
 
@@ -118,10 +119,6 @@ public final class MainController {
 	private void initialize() {
 		newReleasesTabController.setMainController(this);
 		artistWatchlistTabController.setMainController(this);
-
-		notificationPane = new NotificationPane(borderPane.getCenter());
-		notificationPane.getStyleClass().add(NotificationPane.STYLE_CLASS_DARK);
-		borderPane.setCenter(notificationPane);
 
 		addTabListeners();
 
@@ -384,7 +381,6 @@ public final class MainController {
 		String imagePath = MainController.class.getResource("/com/github/kaiwinter/napsterreleases/ui/" + icon).toExternalForm();
 		ImageView image = new ImageView(imagePath);
 		notificationPane.setGraphic(image);
-		notificationPane.getActions().clear();
 		notificationPane.setText(text);
 		notificationPane.show();
 
