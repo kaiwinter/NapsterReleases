@@ -42,25 +42,17 @@ public final class AlbumTabView {
 	@FXML
 	private Region loadingIndicatorBackground;
 
-	private AlbumTabViewModel viewModel;
+	public void setViewModel(AlbumTabViewModel viewModel) {
+		viewModel.albumNameProperty().bindBidirectional(albumNameTf.textProperty());
+		viewModel.artistNameProperty().bindBidirectional(albumArtistTf.textProperty());
+		viewModel.discCountProperty().bindBidirectional(albumDiscCountTf.textProperty());
+		viewModel.typeProperty().bindBidirectional(albumTypeTf.textProperty());
+		viewModel.tagsProperty().bindBidirectional(albumTagsTf.textProperty());
+		viewModel.releaseDateProperty().bindBidirectional(albumReleaseDateTf.textProperty());
+		viewModel.tracksProperty().bindBidirectional(albumTracksTa.textProperty());
+		viewModel.imageProperty().bindBidirectional(albumImageIv.imageProperty());
 
-	@FXML
-	public void initialize() {
-		this.viewModel = new AlbumTabViewModel();
-		this.viewModel.albumNameProperty().bindBidirectional(albumNameTf.textProperty());
-		this.viewModel.artistNameProperty().bindBidirectional(albumArtistTf.textProperty());
-		this.viewModel.discCountProperty().bindBidirectional(albumDiscCountTf.textProperty());
-		this.viewModel.typeProperty().bindBidirectional(albumTypeTf.textProperty());
-		this.viewModel.tagsProperty().bindBidirectional(albumTagsTf.textProperty());
-		this.viewModel.releaseDateProperty().bindBidirectional(albumReleaseDateTf.textProperty());
-		this.viewModel.tracksProperty().bindBidirectional(albumTracksTa.textProperty());
-		this.viewModel.imageProperty().bindBidirectional(albumImageIv.imageProperty());
-
-		this.viewModel.loadingProperty().bindBidirectional(loadingIndicator.visibleProperty());
-		this.viewModel.loadingProperty().bindBidirectional(loadingIndicatorBackground.visibleProperty());
-	}
-
-	public AlbumTabViewModel getViewModel() {
-		return viewModel;
+		viewModel.loadingProperty().bindBidirectional(loadingIndicator.visibleProperty());
+		viewModel.loadingProperty().bindBidirectional(loadingIndicatorBackground.visibleProperty());
 	}
 }

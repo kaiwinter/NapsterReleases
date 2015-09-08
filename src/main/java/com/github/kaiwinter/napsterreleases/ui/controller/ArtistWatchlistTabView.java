@@ -41,16 +41,12 @@ public final class ArtistWatchlistTabView {
 
 	private ArtistWatchlistTabViewModel viewModel;
 
-	private MainController mainController;
-
-	@FXML
-	private void initialize() {
-		this.viewModel = new ArtistWatchlistTabViewModel();
-
+	public void setViewModel(ArtistWatchlistTabViewModel viewModel) {
+		this.viewModel = viewModel;
 		SortedList<WatchedArtist> sortedList = new SortedList<>(FXCollections.observableArrayList());
 		artistsTv.setItems(sortedList);
 		sortedList.comparatorProperty().bind(artistsTv.comparatorProperty());
-		this.viewModel.watchedArtists().bindBidirectional(artistsTv.itemsProperty());
+		viewModel.watchedArtists().bindBidirectional(artistsTv.itemsProperty());
 
 		artistsTv.getSortOrder().add(artistTc);
 
@@ -61,7 +57,7 @@ public final class ArtistWatchlistTabView {
 			MenuItem addToWatchlistMenuItem = new MenuItem("Remove from Watchlist");
 			addToWatchlistMenuItem.setOnAction((e) -> {
 				WatchedArtist selectedArtist = artistsTv.getSelectionModel().getSelectedItem();
-				mainController.removeArtistFromWatchlist(selectedArtist);
+				viewModel.removeArtistFromWatchlist(selectedArtist);
 			});
 			artistColumnContextMenu.getItems().add(addToWatchlistMenuItem);
 			row.contextMenuProperty().bind(
@@ -102,14 +98,6 @@ public final class ArtistWatchlistTabView {
 
 	@FXML
 	public void clearArtistWatchlist() {
-		mainController.clearArtistWatchlist();
-	}
-
-	public ArtistWatchlistTabViewModel getViewModel() {
-		return viewModel;
-	}
-
-	public void setMainController(MainController mainController) {
-		this.mainController = mainController;
+		viewModel.clearArtistWatchlist();
 	}
 }

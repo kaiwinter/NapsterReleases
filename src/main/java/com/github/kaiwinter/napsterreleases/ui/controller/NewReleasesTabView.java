@@ -54,13 +54,12 @@ public final class NewReleasesTabView {
 	@FXML
 	private Region loadingIndicatorBackground;
 
-	private MainController mainController;
+	private MainViewModel mainViewModel;
 
 	private NewReleasesTabViewModel viewModel;
 
-	@FXML
-	private void initialize() {
-		viewModel = new NewReleasesTabViewModel();
+	public void setViewModel(NewReleasesTabViewModel viewModel) {
+		this.viewModel = viewModel;
 		viewModel.genresProperty().bindBidirectional(genreList.rootProperty());
 		viewModel.releasesProperty().bindBidirectional(releasesTv.itemsProperty());
 		viewModel.genreDescriptionProperty().bindBidirectional(textArea.textProperty());
@@ -95,16 +94,15 @@ public final class NewReleasesTabView {
 
 	@FXML
 	private void loadGenres() {
-		mainController.loadGenres();
+		viewModel.loadGenres();
 	}
 
 	@FXML
 	private void logout() {
-		mainController.logout();
+		mainViewModel.logout();
 	}
 
 	private void prepareUi() {
-		genreList.setShowRoot(false);
 		genreList.setCellFactory(param -> {
 			TreeCell<GenreData> listCell = new TreeCell<GenreData>() {
 				@Override
@@ -122,18 +120,15 @@ public final class NewReleasesTabView {
 
 		genreList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
 			FilterSupport.getItems(releasesTv).clear();
-			mainController.clearDetailTabs();
 
 			if (newValue == null) {
 				textArea.clear();
 			} else {
 				textArea.setText(newValue.getValue().description);
-				mainController.showNewReleases(newValue.getValue());
+				viewModel.showNewReleases(newValue.getValue());
 			}
 		});
 
-		releasesTv.getSelectionModel().selectedItemProperty()
-				.addListener((observable, oldValue, newValue) -> mainController.clearDetailTabs());
 		releasesTv.setRowFactory(tv -> {
 			TableRow<AlbumData> row = new TableRow<>();
 
@@ -141,7 +136,7 @@ public final class NewReleasesTabView {
 			MenuItem addToWatchlistMenuItem = new MenuItem("Add Artist to Watchlist");
 			addToWatchlistMenuItem.setOnAction((e) -> {
 				AlbumData selectedItem = releasesTv.getSelectionModel().getSelectedItem();
-				mainController.addArtistToWatchlist(selectedItem.artist);
+				mainViewModel.addArtistToWatchlist(selectedItem.artist);
 			});
 			artistColumnContextMenu.getItems().add(addToWatchlistMenuItem);
 			row.contextMenuProperty().bind(
@@ -190,7 +185,7 @@ public final class NewReleasesTabView {
 
 			tableCell.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
 				if (event.getClickCount() == 2) {
-					mainController.switchToArtistTab();
+					mainViewModel.switchToArtistTab();
 				}
 			});
 
@@ -202,7 +197,7 @@ public final class NewReleasesTabView {
 
 			tableCell.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
 				if (event.getClickCount() == 2) {
-					mainController.switchToAlbumTab();
+					mainViewModel.switchToAlbumTab();
 				}
 			});
 
@@ -210,11 +205,8 @@ public final class NewReleasesTabView {
 		});
 	}
 
-	public void setMainController(MainController mainController) {
-		this.mainController = mainController;
+	public void setMainViewModel(MainViewModel mainViewModel) {
+		this.mainViewModel = mainViewModel;
 	}
 
-	public NewReleasesTabViewModel getViewModel() {
-		return viewModel;
-	}
 }

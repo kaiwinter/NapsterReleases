@@ -30,21 +30,13 @@ public final class ArtistTabView {
 	@FXML
 	private Region loadingIndicatorBackground;
 
-	private ArtistTabViewModel viewModel;
+	public void setViewModel(ArtistTabViewModel viewModel) {
+		viewModel.nameProperty().bindBidirectional(artistNameTf.textProperty());
+		viewModel.bioProperty().bindBidirectional(artistBioTa.textProperty());
+		viewModel.blubsProperty().bindBidirectional(artistBlurbsTa.textProperty());
+		viewModel.imageProperty().bindBidirectional(artistImageIv.imageProperty());
 
-	@FXML
-	public void initialize() {
-		this.viewModel = new ArtistTabViewModel();
-		this.viewModel.nameProperty().bindBidirectional(artistNameTf.textProperty());
-		this.viewModel.bioProperty().bindBidirectional(artistBioTa.textProperty());
-		this.viewModel.blubsProperty().bindBidirectional(artistBlurbsTa.textProperty());
-		this.viewModel.imageProperty().bindBidirectional(artistImageIv.imageProperty());
-
-		this.viewModel.loadingProperty().bindBidirectional(loadingIndicator.visibleProperty());
-		this.viewModel.loadingProperty().bindBidirectional(loadingIndicatorBackground.visibleProperty());
-	}
-
-	public ArtistTabViewModel getViewModel() {
-		return viewModel;
+		viewModel.loadingProperty().bindBidirectional(loadingIndicator.visibleProperty());
+		viewModel.loadingProperty().bindBidirectional(loadingIndicatorBackground.visibleProperty());
 	}
 }
