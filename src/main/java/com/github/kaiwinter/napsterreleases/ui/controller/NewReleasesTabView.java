@@ -96,7 +96,7 @@ public final class NewReleasesTabView {
 
 	@FXML
 	private void logout() {
-		mainViewModel.logout();
+		viewModel.logout();
 	}
 
 	private void prepareUi() {

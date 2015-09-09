@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.kaiwinter.napsterreleases.util.TimeUtil;
-import com.github.kaiwinter.rhapsody.api.RhapsodySdkWrapper;
 import com.github.kaiwinter.rhapsody.model.AlbumData;
 
 import javafx.beans.property.BooleanProperty;
@@ -37,12 +36,10 @@ public final class AlbumTabViewModel {
 	private final ObjectProperty<Image> image = new SimpleObjectProperty<>();
 	private final ObjectProperty<AlbumData> selectedAlbum = new SimpleObjectProperty<AlbumData>();
 
-	private final RhapsodySdkWrapper rhapsodySdkWrapper;
+	private final SharedViewModel sharedViewModel;
 
-	private MainViewModel viewModel;
-
-	public AlbumTabViewModel(RhapsodySdkWrapper rhapsodySdkWrapper) {
-		this.rhapsodySdkWrapper = rhapsodySdkWrapper;
+	public AlbumTabViewModel(SharedViewModel sharedViewModel) {
+		this.sharedViewModel = sharedViewModel;
 		selectedAlbum.addListener((ChangeListener<AlbumData>) (observable, oldValue, newValue) -> clear());
 	}
 
@@ -104,7 +101,7 @@ public final class AlbumTabViewModel {
 		}
 		String albumId = albumData.id;
 		loadingProperty().set(true);
-		rhapsodySdkWrapper.loadAlbum(albumId, new Callback<AlbumData>() {
+		sharedViewModel.getRhapsodySdkWrapper().loadAlbum(albumId, new Callback<AlbumData>() {
 
 			@Override
 			public void success(AlbumData albumData, Response response) {
@@ -117,7 +114,7 @@ public final class AlbumTabViewModel {
 			public void failure(RetrofitError error) {
 				loadingProperty().set(false);
 				LOGGER.error("Error loading album ({})", error.getMessage());
-				viewModel.handleError(error, () -> showAlbum());
+				sharedViewModel.handleError(error, () -> showAlbum());
 			}
 		});
 	}
@@ -146,9 +143,5 @@ public final class AlbumTabViewModel {
 		this.tracks.set(tracks);
 
 		this.type.set(albumData.type.name);
-	}
-
-	public void setMainViewModel(MainViewModel viewModel) {
-		this.viewModel = viewModel;
 	}
 }

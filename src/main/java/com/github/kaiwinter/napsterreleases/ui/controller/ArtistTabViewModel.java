@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.kaiwinter.rhapsody.api.ArtistImageSize;
-import com.github.kaiwinter.rhapsody.api.RhapsodySdkWrapper;
 import com.github.kaiwinter.rhapsody.model.AlbumData;
 import com.github.kaiwinter.rhapsody.model.ArtistData;
 import com.github.kaiwinter.rhapsody.model.BioData;
@@ -33,12 +32,10 @@ public final class ArtistTabViewModel {
 	private final ObjectProperty<Image> image = new SimpleObjectProperty<>();
 	private final ObjectProperty<AlbumData> selectedAlbum = new SimpleObjectProperty<AlbumData>();
 
-	private final RhapsodySdkWrapper rhapsodySdkWrapper;
+	private final SharedViewModel sharedViewModel;
 
-	private MainViewModel viewModel;
-
-	public ArtistTabViewModel(RhapsodySdkWrapper rhapsodySdkWrapper) {
-		this.rhapsodySdkWrapper = rhapsodySdkWrapper;
+	public ArtistTabViewModel(SharedViewModel sharedViewModel) {
+		this.sharedViewModel = sharedViewModel;
 		selectedAlbum.addListener((ChangeListener<AlbumData>) (observable, oldValue, newValue) -> clear());
 	}
 
@@ -81,11 +78,11 @@ public final class ArtistTabViewModel {
 		String artistId = albumData.artist.id;
 		loadingProperty().set(true);
 
-		String imageUrl = rhapsodySdkWrapper.getArtistImageUrl(artistId, ArtistImageSize.SIZE_356_237);
+		String imageUrl = sharedViewModel.getRhapsodySdkWrapper().getArtistImageUrl(artistId, ArtistImageSize.SIZE_356_237);
 		Image image = new Image(imageUrl, true);
 		imageProperty().set(image);
 
-		rhapsodySdkWrapper.loadArtistMeta(artistId, new Callback<ArtistData>() {
+		sharedViewModel.getRhapsodySdkWrapper().loadArtistMeta(artistId, new Callback<ArtistData>() {
 			@Override
 			public void success(ArtistData artistData, Response response) {
 				LOGGER.info("Loaded artist '{}'", artistData.name);
@@ -95,11 +92,11 @@ public final class ArtistTabViewModel {
 			@Override
 			public void failure(RetrofitError error) {
 				LOGGER.error("Error loading artist ({})", error.getMessage());
-				viewModel.handleError(error, () -> showArtist());
+				sharedViewModel.handleError(error, () -> showArtist());
 			}
 		});
 
-		rhapsodySdkWrapper.loadArtistBio(artistId, new Callback<BioData>() {
+		sharedViewModel.getRhapsodySdkWrapper().loadArtistBio(artistId, new Callback<BioData>() {
 			@Override
 			public void success(BioData bio, Response response) {
 				LOGGER.info("Loaded bio, empty: {}, blurbs #: {}", bio.bio.isEmpty(), bio.blurbs.size());
@@ -113,12 +110,8 @@ public final class ArtistTabViewModel {
 			public void failure(RetrofitError error) {
 				loadingProperty().set(false);
 				LOGGER.error("Error loading bio ({})", error.getMessage());
-				viewModel.handleError(error, () -> showArtist());
+				sharedViewModel.handleError(error, () -> showArtist());
 			}
 		});
-	}
-
-	public void setMainViewModel(MainViewModel viewModel) {
-		this.viewModel = viewModel;
 	}
 }

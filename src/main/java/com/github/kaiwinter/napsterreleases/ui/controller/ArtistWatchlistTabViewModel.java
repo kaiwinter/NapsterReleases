@@ -15,7 +15,6 @@ import com.github.kaiwinter.napsterreleases.UserSettings;
 import com.github.kaiwinter.napsterreleases.ui.model.WatchedArtist;
 import com.github.kaiwinter.napsterreleases.ui.model.WatchedArtist.LastRelease;
 import com.github.kaiwinter.napsterreleases.util.TimeUtil;
-import com.github.kaiwinter.rhapsody.api.RhapsodySdkWrapper;
 import com.github.kaiwinter.rhapsody.model.AlbumData;
 import com.github.kaiwinter.rhapsody.model.AlbumData.Artist;
 
@@ -34,7 +33,7 @@ public final class ArtistWatchlistTabViewModel {
 	private final BooleanProperty loading = new SimpleBooleanProperty();
 	private final ListProperty<WatchedArtist> watchedArtists = new SimpleListProperty<>();
 
-	private final RhapsodySdkWrapper rhapsodySdkWrapper;
+	private final SharedViewModel sharedViewModel;
 	private final UserSettings userSettings;
 
 	/**
@@ -42,8 +41,8 @@ public final class ArtistWatchlistTabViewModel {
 	 */
 	private final Map<String, LastRelease> artistId2ReleaseDateCache = new HashMap<>();
 
-	public ArtistWatchlistTabViewModel(RhapsodySdkWrapper rhapsodySdkWrapper, UserSettings userSettings) {
-		this.rhapsodySdkWrapper = rhapsodySdkWrapper;
+	public ArtistWatchlistTabViewModel(SharedViewModel sharedViewModel, UserSettings userSettings) {
+		this.sharedViewModel = sharedViewModel;
 		this.userSettings = userSettings;
 	}
 
@@ -76,7 +75,8 @@ public final class ArtistWatchlistTabViewModel {
 					watchedArtist.lastRelease = artistId2ReleaseDateCache.get(watchedArtist.artist.id);
 
 					if (watchedArtist.lastRelease == null) {
-						Collection<AlbumData> artistNewReleases = rhapsodySdkWrapper.getArtistNewReleases(watchedArtist.artist.id, 1);
+						Collection<AlbumData> artistNewReleases = sharedViewModel.getRhapsodySdkWrapper()
+								.getArtistNewReleases(watchedArtist.artist.id, 1);
 						if (artistNewReleases.size() > 0) {
 							AlbumData albumData = artistNewReleases.iterator().next();
 							watchedArtist.lastRelease = new LastRelease();

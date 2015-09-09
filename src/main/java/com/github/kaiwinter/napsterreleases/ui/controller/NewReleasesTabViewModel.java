@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 
 import com.github.kaiwinter.jfx.tablecolumn.filter.FilterSupport;
 import com.github.kaiwinter.napsterreleases.UserSettings;
-import com.github.kaiwinter.rhapsody.api.RhapsodySdkWrapper;
 import com.github.kaiwinter.rhapsody.model.AccountData;
 import com.github.kaiwinter.rhapsody.model.AlbumData;
 import com.github.kaiwinter.rhapsody.model.GenreData;
@@ -48,15 +47,13 @@ public final class NewReleasesTabViewModel {
 	private final BooleanProperty typeColumVisible = new SimpleBooleanProperty();
 	private final BooleanProperty discsColumVisible = new SimpleBooleanProperty();
 
-	private final RhapsodySdkWrapper rhapsodySdkWrapper;
+	private final SharedViewModel sharedViewModel;
 	private final UserSettings userSettings;
 
 	private AccountData userAccountData;
 
-	private MainViewModel mainViewModel;
-
-	public NewReleasesTabViewModel(RhapsodySdkWrapper rhapsodySdkWrapper, UserSettings userSettings) {
-		this.rhapsodySdkWrapper = rhapsodySdkWrapper;
+	public NewReleasesTabViewModel(SharedViewModel sharedViewModel, UserSettings userSettings) {
+		this.sharedViewModel = sharedViewModel;
 		this.userSettings = userSettings;
 	}
 
@@ -104,7 +101,7 @@ public final class NewReleasesTabViewModel {
 		return this.discsColumVisible;
 	}
 
-	public void clearData() {
+	private void clearData() {
 		genres.set(null);
 		FilterSupport.getUnwrappedList(releases.get()).clear();
 		genreDescription.set(null);
@@ -113,7 +110,7 @@ public final class NewReleasesTabViewModel {
 	public void loadGenres() {
 		clearData();
 		loadingProperty().set(true);
-		rhapsodySdkWrapper.loadGenres(new Callback<Collection<GenreData>>() {
+		sharedViewModel.getRhapsodySdkWrapper().loadGenres(new Callback<Collection<GenreData>>() {
 
 			@Override
 			public void success(Collection<GenreData> genres, Response response) {
@@ -126,7 +123,7 @@ public final class NewReleasesTabViewModel {
 			public void failure(RetrofitError error) {
 				loadingProperty().set(false);
 				LOGGER.error("Error loading genres ({})", error.getMessage());
-				mainViewModel.handleError(error, () -> loadGenres());
+				sharedViewModel.handleError(error, () -> loadGenres());
 			}
 		});
 	}
@@ -185,16 +182,16 @@ public final class NewReleasesTabViewModel {
 			public void failure(RetrofitError error) {
 				loadingProperty().set(false);
 				LOGGER.error("Error loading albums ({})", error.getMessage());
-				mainViewModel.handleError(error, () -> showNewReleases(genreData));
+				sharedViewModel.handleError(error, () -> showNewReleases(genreData));
 			}
 		};
 
 		if (RHAPSODY_CURATED.equals(genreData.id)) {
-			rhapsodySdkWrapper.loadAlbumNewReleases(null, callback);
+			sharedViewModel.getRhapsodySdkWrapper().loadAlbumNewReleases(null, callback);
 		} else if (RHAPSODY_PERSONALIZED.equals(genreData.id)) {
 			loadPersonalizedNewReleases(callback);
 		} else {
-			rhapsodySdkWrapper.loadGenreNewReleases(genreData.id, null, callback);
+			sharedViewModel.getRhapsodySdkWrapper().loadGenreNewReleases(genreData.id, null, callback);
 		}
 	}
 
@@ -205,7 +202,7 @@ public final class NewReleasesTabViewModel {
 				@Override
 				public void success(AccountData userAccountData, Response response) {
 					NewReleasesTabViewModel.this.userAccountData = userAccountData;
-					rhapsodySdkWrapper.loadAlbumNewReleases(userAccountData.id, callback);
+					sharedViewModel.getRhapsodySdkWrapper().loadAlbumNewReleases(userAccountData.id, callback);
 				}
 
 				@Override
@@ -214,9 +211,9 @@ public final class NewReleasesTabViewModel {
 					callback.failure(error);
 				}
 			};
-			rhapsodySdkWrapper.loadAccount(loadUserAccountCallback);
+			sharedViewModel.getRhapsodySdkWrapper().loadAccount(loadUserAccountCallback);
 		} else {
-			rhapsodySdkWrapper.loadAlbumNewReleases(userAccountData.id, callback);
+			sharedViewModel.getRhapsodySdkWrapper().loadAlbumNewReleases(userAccountData.id, callback);
 		}
 	}
 
@@ -237,7 +234,8 @@ public final class NewReleasesTabViewModel {
 		discsColumVisibleProperty().addListener((observable, oldValue, newValue) -> userSettings.setDiscColumnVisible(newValue));
 	}
 
-	public void setMainViewModel(MainViewModel mainViewModel) {
-		this.mainViewModel = mainViewModel;
+	public void logout() {
+		sharedViewModel.logout();
+		clearData();
 	}
 }
