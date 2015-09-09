@@ -83,9 +83,6 @@ public final class NewReleasesTabView {
 		sorted.comparatorProperty().bind(releasesTv.comparatorProperty());
 		viewModel.releasesProperty().bindBidirectional(releasesTv.itemsProperty());
 
-		// Initial sort by release data
-		releasesTv.getSortOrder().add(releasedTc);
-
 		FilterSupport.addFilter(artistTc);
 		FilterSupport.addFilter(albumTc);
 		FilterSupport.addFilter(releasedTc);

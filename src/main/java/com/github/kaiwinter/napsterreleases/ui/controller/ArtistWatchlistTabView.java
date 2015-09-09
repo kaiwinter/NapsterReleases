@@ -48,8 +48,6 @@ public final class ArtistWatchlistTabView {
 		sortedList.comparatorProperty().bind(artistsTv.comparatorProperty());
 		viewModel.watchedArtists().bindBidirectional(artistsTv.itemsProperty());
 
-		artistsTv.getSortOrder().add(artistTc);
-
 		artistsTv.setRowFactory(tv -> {
 			TableRow<WatchedArtist> row = new TableRow<>();
 
