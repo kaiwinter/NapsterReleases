@@ -3,6 +3,8 @@ package com.github.kaiwinter.napsterreleases.ui.controller;
 import com.github.kaiwinter.napsterreleases.ui.model.WatchedArtist;
 import com.github.kaiwinter.napsterreleases.ui.model.WatchedArtist.LastRelease;
 
+import de.saxsys.mvvmfx.FxmlView;
+import de.saxsys.mvvmfx.InjectViewModel;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValueBase;
 import javafx.collections.FXCollections;
@@ -19,7 +21,7 @@ import javafx.scene.layout.Region;
 /**
  * Controller for the artist watchlist tab.
  */
-public final class ArtistWatchlistTabView {
+public final class ArtistWatchlistTabView implements FxmlView<ArtistWatchlistTabViewModel> {
 
 	@FXML
 	private TableView<WatchedArtist> artistsTv;
@@ -39,14 +41,15 @@ public final class ArtistWatchlistTabView {
 	@FXML
 	private Region loadingIndicatorBackground;
 
+	@InjectViewModel
 	private ArtistWatchlistTabViewModel viewModel;
 
-	public void setViewModel(ArtistWatchlistTabViewModel viewModel) {
-		this.viewModel = viewModel;
+	@FXML
+	public void initialize() {
 		SortedList<WatchedArtist> sortedList = new SortedList<>(FXCollections.observableArrayList());
 		artistsTv.setItems(sortedList);
 		sortedList.comparatorProperty().bind(artistsTv.comparatorProperty());
-		viewModel.watchedArtists().bindBidirectional(artistsTv.itemsProperty());
+		viewModel.watchedArtistsProperty().bindBidirectional(artistsTv.itemsProperty());
 
 		artistsTv.setRowFactory(tv -> {
 			TableRow<WatchedArtist> row = new TableRow<>();
@@ -92,6 +95,8 @@ public final class ArtistWatchlistTabView {
 				return lastRelease.albumName;
 			}
 		});
+
+		viewModel.loadArtistWatchlist();
 	}
 
 	@FXML

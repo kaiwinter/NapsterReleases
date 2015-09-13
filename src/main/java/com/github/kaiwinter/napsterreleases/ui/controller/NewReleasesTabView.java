@@ -1,10 +1,14 @@
 package com.github.kaiwinter.napsterreleases.ui.controller;
 
+import javax.inject.Inject;
+
 import com.github.kaiwinter.jfx.tablecolumn.filter.FilterSupport;
 import com.github.kaiwinter.napsterreleases.util.TimeUtil;
 import com.github.kaiwinter.rhapsody.model.AlbumData;
 import com.github.kaiwinter.rhapsody.model.GenreData;
 
+import de.saxsys.mvvmfx.FxmlView;
+import de.saxsys.mvvmfx.InjectViewModel;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValueBase;
 import javafx.collections.FXCollections;
@@ -27,7 +31,7 @@ import javafx.scene.layout.Region;
 /**
  * Controller for the New Releases tab.
  */
-public final class NewReleasesTabView {
+public final class NewReleasesTabView implements FxmlView<NewReleasesTabViewModel> {
 
 	@FXML
 	private TreeView<GenreData> genreList;
@@ -54,12 +58,17 @@ public final class NewReleasesTabView {
 	@FXML
 	private Region loadingIndicatorBackground;
 
+	@Inject
 	private MainViewModel mainViewModel;
 
+	@Inject
+	private ArtistWatchlistTabViewModel artistWatchlistTabViewModel;
+
+	@InjectViewModel
 	private NewReleasesTabViewModel viewModel;
 
-	public void setViewModel(NewReleasesTabViewModel viewModel) {
-		this.viewModel = viewModel;
+	@FXML
+	public void initialize() {
 		viewModel.genresProperty().bindBidirectional(genreList.rootProperty());
 		viewModel.releasesProperty().bindBidirectional(releasesTv.itemsProperty());
 		viewModel.genreDescriptionProperty().bindBidirectional(textArea.textProperty());
@@ -87,6 +96,10 @@ public final class NewReleasesTabView {
 		FilterSupport.addFilter(albumTc);
 		FilterSupport.addFilter(releasedTc);
 		FilterSupport.addFilter(typeTc);
+
+		loadGenres();
+		viewModel.loadColumnVisibility();
+		viewModel.addColumnVisibilityListeners();
 	}
 
 	@FXML
@@ -133,7 +146,7 @@ public final class NewReleasesTabView {
 			MenuItem addToWatchlistMenuItem = new MenuItem("Add Artist to Watchlist");
 			addToWatchlistMenuItem.setOnAction((e) -> {
 				AlbumData selectedItem = releasesTv.getSelectionModel().getSelectedItem();
-				mainViewModel.addArtistToWatchlist(selectedItem.artist);
+				artistWatchlistTabViewModel.addArtistToWatchlist(selectedItem.artist);
 			});
 			artistColumnContextMenu.getItems().add(addToWatchlistMenuItem);
 			row.contextMenuProperty().bind(
@@ -201,9 +214,4 @@ public final class NewReleasesTabView {
 			return tableCell;
 		});
 	}
-
-	public void setMainViewModel(MainViewModel mainViewModel) {
-		this.mainViewModel = mainViewModel;
-	}
-
 }

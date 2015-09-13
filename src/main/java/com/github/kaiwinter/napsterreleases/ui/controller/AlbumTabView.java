@@ -1,5 +1,7 @@
 package com.github.kaiwinter.napsterreleases.ui.controller;
 
+import de.saxsys.mvvmfx.FxmlView;
+import de.saxsys.mvvmfx.InjectViewModel;
 import javafx.fxml.FXML;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextArea;
@@ -10,7 +12,7 @@ import javafx.scene.layout.Region;
 /**
  * Album tab view.
  */
-public final class AlbumTabView {
+public final class AlbumTabView implements FxmlView<AlbumTabViewModel> {
 
 	@FXML
 	private TextField albumNameTf;
@@ -42,7 +44,11 @@ public final class AlbumTabView {
 	@FXML
 	private Region loadingIndicatorBackground;
 
-	public void setViewModel(AlbumTabViewModel viewModel) {
+	@InjectViewModel
+	private AlbumTabViewModel viewModel;
+
+	@FXML
+	public void initialize() {
 		viewModel.albumNameProperty().bindBidirectional(albumNameTf.textProperty());
 		viewModel.artistNameProperty().bindBidirectional(albumArtistTf.textProperty());
 		viewModel.discCountProperty().bindBidirectional(albumDiscCountTf.textProperty());

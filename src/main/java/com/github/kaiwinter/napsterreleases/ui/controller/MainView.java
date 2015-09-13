@@ -3,9 +3,14 @@ package com.github.kaiwinter.napsterreleases.ui.controller;
 import java.io.IOException;
 import java.util.Optional;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import org.controlsfx.control.NotificationPane;
 import org.controlsfx.dialog.LoginDialog;
 
+import de.saxsys.mvvmfx.FxmlView;
+import de.saxsys.mvvmfx.InjectViewModel;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -22,7 +27,8 @@ import javafx.util.Pair;
 /**
  * Main view of the application window. It contains three more controllers, one for each tab.
  */
-public final class MainView {
+@Singleton
+public final class MainView implements FxmlView<MainViewModel> {
 
 	@FXML
 	private BorderPane borderPane;
@@ -54,23 +60,31 @@ public final class MainView {
 	@FXML
 	private NotificationPane notificationPane;
 
+	@InjectViewModel
+	private MainViewModel mainViewModel;
+
+	@Inject
+	private ArtistTabViewModel artistTabViewModel;
+
+	@Inject
+	private AlbumTabViewModel albumTabViewModel;
+
 	@FXML
 	private void initialize() throws IOException {
-		MainViewModel mainViewModel = new MainViewModel(this, newReleasesTabController, artistTabController, albumTabController,
-				artistWatchlistTabController);
 
 		artistTabHandle.setOnSelectionChanged(event -> {
 			if (artistTabHandle.isSelected()) {
-				mainViewModel.showArtist();
+				artistTabViewModel.showArtist();
 			}
 		});
 
 		albumTabHandle.setOnSelectionChanged(event -> {
 			if (albumTabHandle.isSelected()) {
-				mainViewModel.showAlbum();
+				albumTabViewModel.showAlbum();
 			}
 		});
 
+		mainViewModel.bindSelectedAlbumProperty();
 	}
 
 	public void switchToArtistTab() {

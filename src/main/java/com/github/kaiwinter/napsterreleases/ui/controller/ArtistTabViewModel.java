@@ -2,6 +2,9 @@ package com.github.kaiwinter.napsterreleases.ui.controller;
 
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,6 +13,7 @@ import com.github.kaiwinter.rhapsody.model.AlbumData;
 import com.github.kaiwinter.rhapsody.model.ArtistData;
 import com.github.kaiwinter.rhapsody.model.BioData;
 
+import de.saxsys.mvvmfx.ViewModel;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -22,20 +26,22 @@ import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 
-public final class ArtistTabViewModel {
+@Singleton
+public final class ArtistTabViewModel implements ViewModel {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ArtistTabViewModel.class.getSimpleName());
 
 	private final BooleanProperty loading = new SimpleBooleanProperty();
+
 	private final StringProperty name = new SimpleStringProperty();
 	private final StringProperty bio = new SimpleStringProperty();
 	private final StringProperty blubs = new SimpleStringProperty();
 	private final ObjectProperty<Image> image = new SimpleObjectProperty<>();
 	private final ObjectProperty<AlbumData> selectedAlbum = new SimpleObjectProperty<AlbumData>();
 
-	private final SharedViewModel sharedViewModel;
+	@Inject
+	private SharedViewModel sharedViewModel;
 
-	public ArtistTabViewModel(SharedViewModel sharedViewModel) {
-		this.sharedViewModel = sharedViewModel;
+	public ArtistTabViewModel() {
 		selectedAlbum.addListener((ChangeListener<AlbumData>) (observable, oldValue, newValue) -> clear());
 	}
 

@@ -2,6 +2,9 @@ package com.github.kaiwinter.napsterreleases.ui.controller;
 
 import java.util.Collection;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,6 +14,7 @@ import com.github.kaiwinter.rhapsody.model.AccountData;
 import com.github.kaiwinter.rhapsody.model.AlbumData;
 import com.github.kaiwinter.rhapsody.model.GenreData;
 
+import de.saxsys.mvvmfx.ViewModel;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
@@ -26,7 +30,8 @@ import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 
-public final class NewReleasesTabViewModel {
+@Singleton
+public final class NewReleasesTabViewModel implements ViewModel {
 	private static final Logger LOGGER = LoggerFactory.getLogger(NewReleasesTabViewModel.class.getSimpleName());
 
 	private static final String RHAPSODY_CURATED = "rhapsody_curated";
@@ -47,15 +52,13 @@ public final class NewReleasesTabViewModel {
 	private final BooleanProperty typeColumVisible = new SimpleBooleanProperty();
 	private final BooleanProperty discsColumVisible = new SimpleBooleanProperty();
 
-	private final SharedViewModel sharedViewModel;
-	private final UserSettings userSettings;
+	@Inject
+	private SharedViewModel sharedViewModel;
+
+	@Inject
+	private UserSettings userSettings;
 
 	private AccountData userAccountData;
-
-	public NewReleasesTabViewModel(SharedViewModel sharedViewModel, UserSettings userSettings) {
-		this.sharedViewModel = sharedViewModel;
-		this.userSettings = userSettings;
-	}
 
 	public BooleanProperty loadingProperty() {
 		return this.loading;

@@ -3,6 +3,9 @@ package com.github.kaiwinter.napsterreleases.ui.controller;
 import java.io.IOException;
 import java.util.Optional;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import org.controlsfx.dialog.ExceptionDialog;
 
 import com.github.kaiwinter.napsterreleases.RhapsodyApiKeyConfig;
@@ -19,13 +22,16 @@ import retrofit.RetrofitError;
  * A View Model which is shared between the other View Models. Most obvious to provide common methods as
  * {@link #handleError(RetrofitError, ActionRetryCallback)} and the ability to initialize the authorization process.
  */
+@Singleton
 public final class SharedViewModel {
 
-	private final MainView mainView;
 	private final RhapsodySdkWrapper rhapsodySdkWrapper;
 
-	public SharedViewModel(MainView mainView) throws IOException {
-		this.mainView = mainView;
+	@Inject
+	private MainView mainView;
+
+	@Inject
+	public SharedViewModel() throws IOException {
 		RhapsodyApiKeyConfig rhapsodyApiKeyConfig = new RhapsodyApiKeyConfig();
 		rhapsodySdkWrapper = new RhapsodySdkWrapper(rhapsodyApiKeyConfig.apiKey, rhapsodyApiKeyConfig.apiSecret,
 				new PreferencesAuthorizationStore());

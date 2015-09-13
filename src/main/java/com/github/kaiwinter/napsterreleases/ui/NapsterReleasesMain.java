@@ -6,9 +6,13 @@ import org.controlsfx.dialog.ExceptionDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javafx.application.Application;
+import com.github.kaiwinter.napsterreleases.ui.controller.MainView;
+import com.github.kaiwinter.napsterreleases.ui.controller.MainViewModel;
+
+import de.saxsys.mvvmfx.FluentViewLoader;
+import de.saxsys.mvvmfx.ViewTuple;
+import de.saxsys.mvvmfx.guice.MvvmfxGuiceApplication;
 import javafx.application.Platform;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -16,7 +20,7 @@ import javafx.stage.Stage;
 /**
  * Main class which starts the JavaFX application.
  */
-public final class NapsterReleasesMain extends Application {
+public final class NapsterReleasesMain extends MvvmfxGuiceApplication {
 	private static final Logger LOGGER = LoggerFactory.getLogger(NapsterReleasesMain.class.getSimpleName());
 
 	public static void main(String... args) throws IOException {
@@ -24,8 +28,11 @@ public final class NapsterReleasesMain extends Application {
 	}
 
 	@Override
-	public void start(Stage primaryStage) throws IOException {
-		Parent root = FXMLLoader.load(getClass().getResource("ui.fxml"));
+	public void startMvvmfx(Stage primaryStage) throws IOException {
+
+		ViewTuple<MainView, MainViewModel> viewTuple = FluentViewLoader.fxmlView(MainView.class).load();
+		Parent root = viewTuple.getView();
+
 		Scene scene = new Scene(root);
 		primaryStage.setScene(scene);
 		primaryStage.setTitle("Napster New Releases");

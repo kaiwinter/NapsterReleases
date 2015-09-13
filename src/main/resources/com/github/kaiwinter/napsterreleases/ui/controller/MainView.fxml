@@ -18,22 +18,22 @@
 		         <tabs>
 		            <Tab closable="false" text="Genres: New Releases">
 		               <content>
-		      			<fx:include fx:id="newReleasesTab" source="newreleases_tab.fxml" />
+		      			<fx:include fx:id="newReleasesTab" source="NewReleasesTabView.fxml" />
 		               </content>
 		            </Tab>
 		            <Tab fx:id="artistTabHandle" closable="false" text="Artist">
 		               <content>
-		               	<fx:include fx:id="artistTab" source="artist_tab.fxml" />
+		               	<fx:include fx:id="artistTab" source="ArtistTabView.fxml" />
 		               </content>
 		            </Tab>
 		            <Tab fx:id="albumTabHandle" closable="false" text="Album">
 		               <content>
-		               	<fx:include fx:id="albumTab" source="album_tab.fxml" />
+		               	<fx:include fx:id="albumTab" source="AlbumTabView.fxml" />
 		               </content>
 		            </Tab>
 		            <Tab fx:id="artistWatchlistTabHandle" closable="false" text="Watched Artists">
 		               <content>
-		               	<fx:include fx:id="artistWatchlistTab" source="artist_watchlist_tab.fxml" />
+		               	<fx:include fx:id="artistWatchlistTab" source="ArtistWatchlistTabView.fxml" />
 		               </content>
 		            </Tab>
 		         </tabs>

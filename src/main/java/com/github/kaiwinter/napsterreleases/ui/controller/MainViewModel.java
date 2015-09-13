@@ -1,71 +1,35 @@
 package com.github.kaiwinter.napsterreleases.ui.controller;
 
-import java.io.IOException;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
-import com.github.kaiwinter.napsterreleases.UserSettings;
-import com.github.kaiwinter.rhapsody.model.AlbumData.Artist;
+import de.saxsys.mvvmfx.ViewModel;
 
-public final class MainViewModel {
+@Singleton
+public final class MainViewModel implements ViewModel {
 
-	private final MainView mainController;
+	@Inject
+	private NewReleasesTabViewModel newReleasesTabViewModel;
 
-	private final UserSettings userSettings;
+	@Inject
+	private ArtistTabViewModel artistTabViewModel;
 
-	private final NewReleasesTabViewModel newReleasesTabViewModel;
-	private final ArtistTabViewModel artistTabViewModel;
-	private final AlbumTabViewModel albumTabViewModel;
-	private final ArtistWatchlistTabViewModel artistWatchlistTabViewModel;
+	@Inject
+	private AlbumTabViewModel albumTabViewModel;
 
-	public MainViewModel(MainView mainController, NewReleasesTabView newReleasesTabController, ArtistTabView artistTabController,
-			AlbumTabView albumTabController, ArtistWatchlistTabView artistWatchlistTabController) throws IOException {
-		this.mainController = mainController;
-		this.userSettings = new UserSettings();
+	@Inject
+	private MainView mainView;
 
-		// API Wrapper Access
-		SharedViewModel sharedViewModel = new SharedViewModel(mainController);
-
-		// Instantiate ViewModels
-		newReleasesTabViewModel = new NewReleasesTabViewModel(sharedViewModel, userSettings);
-		albumTabViewModel = new AlbumTabViewModel(sharedViewModel);
-		artistTabViewModel = new ArtistTabViewModel(sharedViewModel);
-		artistWatchlistTabViewModel = new ArtistWatchlistTabViewModel(sharedViewModel, userSettings);
-
-		// Set ViewModels in Views
-		newReleasesTabController.setViewModel(newReleasesTabViewModel);
-		artistTabController.setViewModel(artistTabViewModel);
-		albumTabController.setViewModel(albumTabViewModel);
-		artistWatchlistTabController.setViewModel(artistWatchlistTabViewModel);
-
-		newReleasesTabController.setMainViewModel(this);
-
+	public void bindSelectedAlbumProperty() {
 		artistTabViewModel.selectedAlbumProperty().bind(newReleasesTabViewModel.selectedAlbumProperty());
 		albumTabViewModel.selectedAlbumProperty().bind(newReleasesTabViewModel.selectedAlbumProperty());
-
-		newReleasesTabViewModel.loadGenres();
-
-		newReleasesTabViewModel.loadColumnVisibility();
-		newReleasesTabViewModel.addColumnVisibilityListeners();
-
-		artistWatchlistTabViewModel.loadArtistWatchlist();
 	}
 
 	public void switchToArtistTab() {
-		mainController.switchToArtistTab();
+		mainView.switchToArtistTab();
 	}
 
 	public void switchToAlbumTab() {
-		mainController.switchToAlbumTab();
-	}
-
-	public void showArtist() {
-		artistTabViewModel.showArtist();
-	}
-
-	public void showAlbum() {
-		albumTabViewModel.showAlbum();
-	}
-
-	public void addArtistToWatchlist(Artist artist) {
-		artistWatchlistTabViewModel.addArtistToWatchlist(artist);
+		mainView.switchToAlbumTab();
 	}
 }

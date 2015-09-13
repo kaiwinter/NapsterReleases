@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.prefs.Preferences;
 
+import javax.inject.Singleton;
+
 import com.github.kaiwinter.napsterreleases.ui.NapsterReleasesMain;
 import com.github.kaiwinter.rhapsody.model.AlbumData.Artist;
 import com.google.gson.Gson;
@@ -13,6 +15,7 @@ import com.google.gson.reflect.TypeToken;
 /**
  * Stores user settings in the {@link Preferences}.
  */
+@Singleton
 public final class UserSettings {
 
 	private static final String COLUMN_VISIBLE_ARTIST = "COLUMN_VISIBLE_ARTIST";
