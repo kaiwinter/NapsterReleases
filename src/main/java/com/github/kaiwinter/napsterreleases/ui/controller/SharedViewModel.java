@@ -23,7 +23,7 @@ import retrofit.RetrofitError;
  * {@link #handleError(RetrofitError, ActionRetryCallback)} and the ability to initialize the authorization process.
  */
 @Singleton
-public final class SharedViewModel {
+public class SharedViewModel {
 
 	private final RhapsodySdkWrapper rhapsodySdkWrapper;
 
