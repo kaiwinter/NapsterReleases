@@ -80,4 +80,9 @@ public final class ArtistWatchlistTabView implements FxmlView<ArtistWatchlistTab
 	public void clearArtistWatchlist() {
 		viewModel.clearArtistWatchlist();
 	}
+
+	@FXML
+	public void checkUpdates() {
+
+	}
 }

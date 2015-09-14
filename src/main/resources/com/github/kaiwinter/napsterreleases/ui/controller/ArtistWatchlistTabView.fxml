@@ -20,13 +20,30 @@
                   <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                </columnResizePolicy>
 				<sortOrder>
-					<fx:reference source="artistTc"/>
+					<fx:reference source="artistTc" />
 				</sortOrder> 
             </TableView>
-            <Button mnemonicParsing="false" onAction="#clearArtistWatchlist" text="Clear" />
+            <HBox spacing="5.0">
+               <children>
+                  <Button mnemonicParsing="false" onAction="#checkUpdates" text="Check For Updates" />
+                  <Button mnemonicParsing="false" onAction="#clearArtistWatchlist" text="Remove All" />
+               </children>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+               <padding>
+                  <Insets top="5.0" />
+               </padding>
+            </HBox>
          </children>
       </VBox>
       <Region fx:id="loadingIndicatorBackground" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="loading_indicator_background" stylesheets="@style.css" visible="false" />
-      <ProgressIndicator fx:id="loadingIndicator" maxHeight="60.0" maxWidth="60.0" visible="false"/>
+      <ProgressIndicator fx:id="loadingIndicator" maxHeight="60.0" maxWidth="60.0" visible="false" />
    </children>
+   <padding>
+      <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+   </padding>
 </StackPane>

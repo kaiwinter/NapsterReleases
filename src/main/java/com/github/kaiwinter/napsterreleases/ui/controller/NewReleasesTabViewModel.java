@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.kaiwinter.jfx.tablecolumn.filter.FilterSupport;
-import com.github.kaiwinter.napsterreleases.UserSettings;
+import com.github.kaiwinter.napsterreleases.persistence.UISettings;
 import com.github.kaiwinter.rhapsody.model.AccountData;
 import com.github.kaiwinter.rhapsody.model.AlbumData;
 import com.github.kaiwinter.rhapsody.model.GenreData;
@@ -56,7 +56,7 @@ public final class NewReleasesTabViewModel implements ViewModel {
 	private SharedViewModel sharedViewModel;
 
 	@Inject
-	private UserSettings userSettings;
+	private UISettings userSettings;
 
 	private AccountData userAccountData;
 
