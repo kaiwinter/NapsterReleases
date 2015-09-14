@@ -22,6 +22,7 @@ import com.github.kaiwinter.rhapsody.model.AlbumData;
 import com.github.kaiwinter.rhapsody.model.AlbumData.Artist;
 
 import de.saxsys.mvvmfx.ViewModel;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -72,33 +73,40 @@ public final class ArtistWatchlistTabViewModel implements ViewModel {
 		Task<Void> task = new Task<Void>() {
 			@Override
 			protected Void call() throws Exception {
-				ObservableList<WatchedArtist> sortedList = watchedArtistsProperty().get();
-				ObservableList<WatchedArtist> sourceList = (ObservableList<WatchedArtist>) ((SortedList<WatchedArtist>) sortedList)
-						.getSource();
-				for (WatchedArtist watchedArtist : sortedList) {
-					watchedArtist.lastRelease = artistId2ReleaseDateCache.get(watchedArtist.artist.id);
+				for (WatchedArtist watchedArtist : watchedArtists) {
+					LastRelease lastReleaseFromCache = artistId2ReleaseDateCache.get(watchedArtist.getArtist().id);
 
-					if (watchedArtist.lastRelease == null) {
+					if (lastReleaseFromCache == null) {
 						Collection<AlbumData> artistNewReleases = sharedViewModel.getRhapsodySdkWrapper()
-								.getArtistNewReleases(watchedArtist.artist.id, 1);
+								.getArtistNewReleases(watchedArtist.getArtist().id, 1);
 						if (artistNewReleases.size() > 0) {
 							AlbumData albumData = artistNewReleases.iterator().next();
-							watchedArtist.lastRelease = new LastRelease();
-							watchedArtist.lastRelease.date = TimeUtil.timestampToString(albumData.released);
-							watchedArtist.lastRelease.albumName = albumData.name;
-							artistId2ReleaseDateCache.put(watchedArtist.artist.id, watchedArtist.lastRelease);
+							LastRelease lastRelease = new LastRelease();
+							lastRelease.setDate(TimeUtil.timestampToString(albumData.released));
+							lastRelease.setAlbumName(albumData.name);
+							artistId2ReleaseDateCache.put(watchedArtist.getArtist().id, lastRelease);
+							Platform.runLater(() -> {
+								watchedArtist.getLastRelease().setDate(TimeUtil.timestampToString(albumData.released));
+								watchedArtist.getLastRelease().setAlbumName(albumData.name);
+							});
 						}
+					} else {
+						Platform.runLater(() -> {
+							watchedArtist.getLastRelease().setDate(lastReleaseFromCache.getDate());
+							watchedArtist.getLastRelease().setAlbumName(lastReleaseFromCache.getAlbumName());
+						});
 					}
 				}
-				sourceList.setAll(watchedArtists);
 				return null;
 			}
 
 			@Override
 			protected void done() {
 				try {
-					if (!isCancelled())
+					if (!isCancelled()) {
+						// call get to catch a possible exception
 						get();
+					}
 				} catch (ExecutionException e) {
 					LOGGER.error(e.getMessage(), e);
 				} catch (InterruptedException e) {
@@ -111,7 +119,8 @@ public final class ArtistWatchlistTabViewModel implements ViewModel {
 
 	public void removeArtistFromWatchlist(WatchedArtist selectedArtist) {
 		Set<Artist> watchedArtists = userSettings.loadWatchedArtists();
-		watchedArtists = watchedArtists.stream().filter(artist -> !selectedArtist.artist.id.equals(artist.id)).collect(Collectors.toSet());
+		watchedArtists = watchedArtists.stream().filter(artist -> !selectedArtist.getArtist().id.equals(artist.id))
+				.collect(Collectors.toSet());
 		userSettings.saveWatchedArtists(watchedArtists);
 
 		loadArtistWatchlist();

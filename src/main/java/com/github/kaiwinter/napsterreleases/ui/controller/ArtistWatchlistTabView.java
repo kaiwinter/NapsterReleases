@@ -1,12 +1,11 @@
 package com.github.kaiwinter.napsterreleases.ui.controller;
 
+import com.github.kaiwinter.napsterreleases.ui.cellvaluefactory.WatchedArtistCellValueFactory;
 import com.github.kaiwinter.napsterreleases.ui.model.WatchedArtist;
-import com.github.kaiwinter.napsterreleases.ui.model.WatchedArtist.LastRelease;
 
 import de.saxsys.mvvmfx.FxmlView;
 import de.saxsys.mvvmfx.InjectViewModel;
 import javafx.beans.binding.Bindings;
-import javafx.beans.value.ObservableValueBase;
 import javafx.collections.FXCollections;
 import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
@@ -30,10 +29,10 @@ public final class ArtistWatchlistTabView implements FxmlView<ArtistWatchlistTab
 	private TableColumn<WatchedArtist, String> artistTc;
 
 	@FXML
-	private TableColumn<WatchedArtist, String> releasedTc;
+	private TableColumn<WatchedArtist, WatchedArtist> releasedTc;
 
 	@FXML
-	private TableColumn<WatchedArtist, String> albumTc;
+	private TableColumn<WatchedArtist, WatchedArtist> albumTc;
 
 	@FXML
 	private ProgressIndicator loadingIndicator;
@@ -67,34 +66,12 @@ public final class ArtistWatchlistTabView implements FxmlView<ArtistWatchlistTab
 			return row;
 		});
 
-		artistTc.setCellValueFactory(value -> new ObservableValueBase<String>() {
-			@Override
-			public String getValue() {
-				return value.getValue().artist.name;
-			}
-		});
+		artistTc.setCellValueFactory(new WatchedArtistCellValueFactory.NameValueFactory());
+		releasedTc.setCellValueFactory(new WatchedArtistCellValueFactory.WatchedArtistValueFactory());
+		albumTc.setCellValueFactory(new WatchedArtistCellValueFactory.WatchedArtistValueFactory());
 
-		releasedTc.setCellValueFactory(value -> new ObservableValueBase<String>() {
-			@Override
-			public String getValue() {
-				LastRelease lastRelease = value.getValue().lastRelease;
-				if (lastRelease == null) {
-					return null;
-				}
-				return lastRelease.date;
-			}
-		});
-
-		albumTc.setCellValueFactory(value -> new ObservableValueBase<String>() {
-			@Override
-			public String getValue() {
-				LastRelease lastRelease = value.getValue().lastRelease;
-				if (lastRelease == null) {
-					return null;
-				}
-				return lastRelease.albumName;
-			}
-		});
+		releasedTc.setCellFactory(new WatchedArtistCellValueFactory.LastReleaseCellFactory());
+		albumTc.setCellFactory(new WatchedArtistCellValueFactory.AlbumNameCellFactory());
 
 		viewModel.loadArtistWatchlist();
 	}

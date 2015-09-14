@@ -3,29 +3,26 @@ package com.github.kaiwinter.napsterreleases.ui.controller;
 import javax.inject.Inject;
 
 import com.github.kaiwinter.jfx.tablecolumn.filter.FilterSupport;
-import com.github.kaiwinter.napsterreleases.util.TimeUtil;
+import com.github.kaiwinter.napsterreleases.ui.cellvaluefactory.AlbumDataCellValueFactories;
+import com.github.kaiwinter.napsterreleases.ui.cellvaluefactory.DoubleClickListenerCellFactory;
 import com.github.kaiwinter.rhapsody.model.AlbumData;
 import com.github.kaiwinter.rhapsody.model.GenreData;
 
 import de.saxsys.mvvmfx.FxmlView;
 import de.saxsys.mvvmfx.InjectViewModel;
 import javafx.beans.binding.Bindings;
-import javafx.beans.value.ObservableValueBase;
 import javafx.collections.FXCollections;
 import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeView;
-import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
 
 /**
@@ -69,28 +66,23 @@ public final class NewReleasesTabView implements FxmlView<NewReleasesTabViewMode
 
 	@FXML
 	public void initialize() {
-		viewModel.genresProperty().bindBidirectional(genreList.rootProperty());
-		viewModel.releasesProperty().bindBidirectional(releasesTv.itemsProperty());
-		viewModel.genreDescriptionProperty().bindBidirectional(textArea.textProperty());
+		bindProperties();
+		setFactories();
 
-		viewModel.selectedGenreProperty().bind(genreList.getSelectionModel().selectedItemProperty());
-		viewModel.selectedAlbumProperty().bind(releasesTv.getSelectionModel().selectedItemProperty());
+		genreList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+			FilterSupport.getItems(releasesTv).clear();
 
-		viewModel.loadingProperty().bindBidirectional(loadingIndicator.visibleProperty());
-		viewModel.loadingProperty().bindBidirectional(loadingIndicatorBackground.visibleProperty());
-
-		viewModel.artistColumVisibleProperty().bindBidirectional(artistTc.visibleProperty());
-		viewModel.albumColumVisibleProperty().bindBidirectional(albumTc.visibleProperty());
-		viewModel.releasedColumVisibleProperty().bindBidirectional(releasedTc.visibleProperty());
-		viewModel.typeColumVisibleProperty().bindBidirectional(typeTc.visibleProperty());
-		viewModel.discsColumVisibleProperty().bindBidirectional(discsTc.visibleProperty());
-
-		prepareUi();
+			if (newValue == null) {
+				textArea.clear();
+			} else {
+				textArea.setText(newValue.getValue().description);
+				viewModel.showNewReleases(newValue.getValue());
+			}
+		});
 
 		SortedList<AlbumData> sorted = FXCollections.<AlbumData> observableArrayList().filtered(null).sorted();
 		releasesTv.setItems(sorted);
 		sorted.comparatorProperty().bind(releasesTv.comparatorProperty());
-		viewModel.releasesProperty().bindBidirectional(releasesTv.itemsProperty());
 
 		FilterSupport.addFilter(artistTc);
 		FilterSupport.addFilter(albumTc);
@@ -102,17 +94,7 @@ public final class NewReleasesTabView implements FxmlView<NewReleasesTabViewMode
 		viewModel.addColumnVisibilityListeners();
 	}
 
-	@FXML
-	private void loadGenres() {
-		viewModel.loadGenres();
-	}
-
-	@FXML
-	private void logout() {
-		viewModel.logout();
-	}
-
-	private void prepareUi() {
+	private void setFactories() {
 		genreList.setCellFactory(param -> {
 			TreeCell<GenreData> listCell = new TreeCell<GenreData>() {
 				@Override
@@ -126,17 +108,6 @@ public final class NewReleasesTabView implements FxmlView<NewReleasesTabViewMode
 				};
 			};
 			return listCell;
-		});
-
-		genreList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-			FilterSupport.getItems(releasesTv).clear();
-
-			if (newValue == null) {
-				textArea.clear();
-			} else {
-				textArea.setText(newValue.getValue().description);
-				viewModel.showNewReleases(newValue.getValue());
-			}
 		});
 
 		releasesTv.setRowFactory(tv -> {
@@ -155,63 +126,42 @@ public final class NewReleasesTabView implements FxmlView<NewReleasesTabViewMode
 			return row;
 		});
 
-		artistTc.setCellValueFactory(value -> new ObservableValueBase<String>() {
-			@Override
-			public String getValue() {
-				return value.getValue().artist.name;
-			}
-		});
+		artistTc.setCellValueFactory(new AlbumDataCellValueFactories.ArtistNameValueFactory());
+		albumTc.setCellValueFactory(new AlbumDataCellValueFactories.AlbumNameValueFactory());
+		releasedTc.setCellValueFactory(new AlbumDataCellValueFactories.ReleaseDateValueFactory());
+		typeTc.setCellValueFactory(new AlbumDataCellValueFactories.TypeValueFactory());
+		discsTc.setCellValueFactory(new AlbumDataCellValueFactories.DiscCountValueFactory());
 
-		albumTc.setCellValueFactory(value -> new ObservableValueBase<String>() {
-			@Override
-			public String getValue() {
-				return value.getValue().name;
-			}
-		});
-
-		releasedTc.setCellValueFactory(value -> new ObservableValueBase<String>() {
-			@Override
-			public String getValue() {
-				return TimeUtil.timestampToString(value.getValue().released);
-			}
-		});
-
-		typeTc.setCellValueFactory(value -> new ObservableValueBase<String>() {
-			@Override
-			public String getValue() {
-				return value.getValue().type.name;
-			}
-		});
-
-		discsTc.setCellValueFactory(value -> new ObservableValueBase<String>() {
-			@Override
-			public String getValue() {
-				return String.valueOf(value.getValue().discCount);
-			}
-		});
-
-		artistTc.setCellFactory(param -> {
-			TableCell<AlbumData, String> tableCell = new TextFieldTableCell<>();
-
-			tableCell.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
-				if (event.getClickCount() == 2) {
-					mainViewModel.switchToArtistTab();
-				}
-			});
-
-			return tableCell;
-		});
-
-		albumTc.setCellFactory(param -> {
-			TableCell<AlbumData, String> tableCell = new TextFieldTableCell<>();
-
-			tableCell.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
-				if (event.getClickCount() == 2) {
-					mainViewModel.switchToAlbumTab();
-				}
-			});
-
-			return tableCell;
-		});
+		artistTc.setCellFactory(new DoubleClickListenerCellFactory(() -> mainViewModel.switchToArtistTab()));
+		albumTc.setCellFactory(new DoubleClickListenerCellFactory(() -> mainViewModel.switchToAlbumTab()));
 	}
+
+	private void bindProperties() {
+		viewModel.genresProperty().bindBidirectional(genreList.rootProperty());
+		viewModel.releasesProperty().bindBidirectional(releasesTv.itemsProperty());
+		viewModel.genreDescriptionProperty().bindBidirectional(textArea.textProperty());
+
+		viewModel.selectedGenreProperty().bind(genreList.getSelectionModel().selectedItemProperty());
+		viewModel.selectedAlbumProperty().bind(releasesTv.getSelectionModel().selectedItemProperty());
+
+		viewModel.loadingProperty().bindBidirectional(loadingIndicator.visibleProperty());
+		viewModel.loadingProperty().bindBidirectional(loadingIndicatorBackground.visibleProperty());
+
+		viewModel.artistColumVisibleProperty().bindBidirectional(artistTc.visibleProperty());
+		viewModel.albumColumVisibleProperty().bindBidirectional(albumTc.visibleProperty());
+		viewModel.releasedColumVisibleProperty().bindBidirectional(releasedTc.visibleProperty());
+		viewModel.typeColumVisibleProperty().bindBidirectional(typeTc.visibleProperty());
+		viewModel.discsColumVisibleProperty().bindBidirectional(discsTc.visibleProperty());
+	}
+
+	@FXML
+	private void loadGenres() {
+		viewModel.loadGenres();
+	}
+
+	@FXML
+	private void logout() {
+		viewModel.logout();
+	}
+
 }
