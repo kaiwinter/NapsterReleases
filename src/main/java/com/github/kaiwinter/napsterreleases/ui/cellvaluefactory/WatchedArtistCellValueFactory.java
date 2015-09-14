@@ -50,7 +50,9 @@ public final class WatchedArtistCellValueFactory {
 				protected void updateItem(WatchedArtist item, boolean empty) {
 					super.updateItem(item, empty);
 					textProperty().unbind();
-					if (!empty) {
+					if (empty) {
+						setText(null);
+					} else {
 						textProperty().bind(item.getLastRelease().dateProperty());
 					}
 				}
@@ -68,7 +70,9 @@ public final class WatchedArtistCellValueFactory {
 				protected void updateItem(WatchedArtist item, boolean empty) {
 					super.updateItem(item, empty);
 					textProperty().unbind();
-					if (!empty) {
+					if (empty) {
+						setText(null);
+					} else {
 						textProperty().bind(item.getLastRelease().albumNameProperty());
 					}
 				}
