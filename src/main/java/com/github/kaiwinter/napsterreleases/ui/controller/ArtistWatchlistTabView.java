@@ -83,6 +83,6 @@ public final class ArtistWatchlistTabView implements FxmlView<ArtistWatchlistTab
 
 	@FXML
 	public void checkUpdates() {
-
+		viewModel.checkForNewReleases();
 	}
 }

@@ -27,7 +27,7 @@ import javafx.beans.property.ObjectProperty;
  * {@link LastReleaseSerializer} and {@link LastReleaseDeserializer} are necessary.
  */
 @Singleton
-public final class WatchedArtistsStore {
+public class WatchedArtistsStore {
 	private static final Logger LOGGER = LoggerFactory.getLogger(WatchedArtistsStore.class.getSimpleName());
 	private static final String WATCHLIST_FILE = "watchedartists.json";
 

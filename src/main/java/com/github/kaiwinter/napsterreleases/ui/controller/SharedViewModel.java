@@ -78,8 +78,7 @@ public class SharedViewModel {
 			@Override
 			public void failure(int status, String reason) {
 				Platform.runLater(() -> {
-					mainView.showAutoHidingNotification("notification-pane-warning.png",
-							"Authentication failed (" + status + ") - " + reason);
+					mainView.showAutoHidingNotification(NotificationPaneIcon.WARNING, "Authentication failed (" + status + ") - " + reason);
 
 					authorize(actionCallback);
 				});
@@ -99,7 +98,7 @@ public class SharedViewModel {
 			@Override
 			public void success() {
 				Platform.runLater(() -> {
-					mainView.showAutoHidingNotification("notification-pane-info.png", "Authentication successful");
+					mainView.showAutoHidingNotification(NotificationPaneIcon.INFO, "Authentication successful");
 
 					actionCallback.retryAction();
 				});
@@ -123,5 +122,9 @@ public class SharedViewModel {
 
 	public RhapsodySdkWrapper getRhapsodySdkWrapper() {
 		return rhapsodySdkWrapper;
+	}
+
+	public void showAutoHidingNotification(NotificationPaneIcon icon, String message) {
+		mainView.showAutoHidingNotification(icon, message);
 	}
 }

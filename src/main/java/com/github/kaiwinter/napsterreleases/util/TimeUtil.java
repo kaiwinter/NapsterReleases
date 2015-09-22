@@ -18,11 +18,11 @@ public final class TimeUtil {
 	 *
 	 * @param timestamp
 	 *            the timestamp
-	 * @return String representation
+	 * @return String representation or <code>null</code> if <code>timestamp</code> was <code>null</code>
 	 */
 	public static String timestampToString(Long timestamp) {
 		if (timestamp == null) {
-			return "";
+			return null;
 		}
 		Instant instant = Instant.ofEpochMilli(timestamp);
 		String format = DateTimeFormatter.ofPattern("yyyy-MM-dd") //

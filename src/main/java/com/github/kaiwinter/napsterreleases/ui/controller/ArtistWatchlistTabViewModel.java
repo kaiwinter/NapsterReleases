@@ -1,7 +1,9 @@
 package com.github.kaiwinter.napsterreleases.ui.controller;
 
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -10,6 +12,7 @@ import javax.inject.Singleton;
 
 import com.github.kaiwinter.napsterreleases.persistence.WatchedArtistsStore;
 import com.github.kaiwinter.napsterreleases.ui.model.WatchedArtist;
+import com.github.kaiwinter.napsterreleases.ui.model.WatchedArtist.LastRelease;
 import com.github.kaiwinter.napsterreleases.util.TimeUtil;
 import com.github.kaiwinter.rhapsody.model.AlbumData;
 import com.github.kaiwinter.rhapsody.model.AlbumData.Artist;
@@ -19,13 +22,14 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 
 @Singleton
 public final class ArtistWatchlistTabViewModel implements ViewModel {
 	private final BooleanProperty loading = new SimpleBooleanProperty();
-	private final ListProperty<WatchedArtist> watchedArtists = new SimpleListProperty<>();
+	private final ListProperty<WatchedArtist> watchedArtists = new SimpleListProperty(FXCollections.observableArrayList().sorted());
 
 	@Inject
 	private SharedViewModel sharedViewModel;
@@ -49,14 +53,17 @@ public final class ArtistWatchlistTabViewModel implements ViewModel {
 		sourceList.setAll(watchedArtists);
 	}
 
-	private void loadLastRelease(WatchedArtist watchedArtist) {
+	private LastRelease loadLastRelease(WatchedArtist watchedArtist) {
 		Collection<AlbumData> artistNewReleases = sharedViewModel.getRhapsodySdkWrapper().getArtistNewReleases(watchedArtist.getArtist().id,
 				1);
 		if (artistNewReleases.size() > 0) {
 			AlbumData albumData = artistNewReleases.iterator().next();
-			watchedArtist.getLastRelease().setDate(TimeUtil.timestampToString(albumData.released));
-			watchedArtist.getLastRelease().setAlbumName(albumData.name);
+			LastRelease lastRelease = new LastRelease();
+			lastRelease.setAlbumName(albumData.name);
+			lastRelease.setDate(TimeUtil.timestampToString(albumData.released));
+			return lastRelease;
 		}
+		return null;
 	}
 
 	public void removeArtistFromWatchlist(WatchedArtist selectedArtist) {
@@ -75,7 +82,11 @@ public final class ArtistWatchlistTabViewModel implements ViewModel {
 		if (!alreadyAdded) {
 			WatchedArtist watchedArtist = new WatchedArtist(artistToWatch);
 			watchedArtists.add(watchedArtist);
-			loadLastRelease(watchedArtist);
+			LastRelease lastRelease = loadLastRelease(watchedArtist);
+			if (lastRelease != null) {
+				watchedArtist.getLastRelease().setAlbumName(lastRelease.getAlbumName());
+				watchedArtist.getLastRelease().setDate(lastRelease.getDate());
+			}
 
 			watchedArtistsStore.saveWatchedArtists(watchedArtists);
 			loadArtistWatchlist();
@@ -86,5 +97,33 @@ public final class ArtistWatchlistTabViewModel implements ViewModel {
 		watchedArtistsStore.saveWatchedArtists(Collections.emptySet());
 
 		loadArtistWatchlist();
+	}
+
+	/**
+	 * Checks if the watched artists have new released albums. A notification is shown if there are new releases.
+	 */
+	public void checkForNewReleases() {
+		loadArtistWatchlist();
+
+		int updates = 0;
+		for (WatchedArtist watchedArtist : watchedArtists) {
+			LastRelease currentLastRelease = watchedArtist.getLastRelease();
+			LastRelease lastRelease = loadLastRelease(watchedArtist);
+			if (currentLastRelease != null) {
+				if (!currentLastRelease.equals(lastRelease)) {
+					currentLastRelease.setAlbumName(lastRelease.getAlbumName());
+					currentLastRelease.setDate(lastRelease.getDate());
+					currentLastRelease.setUpdated(true);
+					updates++;
+				}
+			}
+		}
+		if (updates > 0) {
+			watchedArtistsStore.saveWatchedArtists(new HashSet<>(watchedArtists));
+			String message = MessageFormat
+					.format("There {0,choice, 1#is|1<are} {0,number,integer} new album {0,choice, 1#release|1<releases}", updates);
+
+			sharedViewModel.showAutoHidingNotification(NotificationPaneIcon.INFO, message);
+		}
 	}
 }

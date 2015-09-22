@@ -2,11 +2,14 @@ package com.github.kaiwinter.napsterreleases.ui.cellvaluefactory;
 
 import com.github.kaiwinter.napsterreleases.ui.model.WatchedArtist;
 
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.value.ObservableValue;
 import javafx.beans.value.ObservableValueBase;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.util.Callback;
 
 /**
@@ -42,7 +45,6 @@ public final class WatchedArtistCellValueFactory {
 
 	public static final class LastReleaseCellFactory
 			implements Callback<TableColumn<WatchedArtist, WatchedArtist>, TableCell<WatchedArtist, WatchedArtist>> {
-
 		@Override
 		public TableCell<WatchedArtist, WatchedArtist> call(TableColumn<WatchedArtist, WatchedArtist> param) {
 			return new TableCell<WatchedArtist, WatchedArtist>() {
@@ -54,6 +56,16 @@ public final class WatchedArtistCellValueFactory {
 						setText(null);
 					} else {
 						textProperty().bind(item.getLastRelease().dateProperty());
+						textFillProperty().bind(new ObjectBinding<Paint>() {
+
+							@Override
+							protected Paint computeValue() {
+								if (item.getLastRelease().isUpdated()) {
+									return Color.RED;
+								}
+								return Color.BLACK;
+							}
+						});
 					}
 				}
 			};
@@ -62,7 +74,6 @@ public final class WatchedArtistCellValueFactory {
 
 	public static final class AlbumNameCellFactory
 			implements Callback<TableColumn<WatchedArtist, WatchedArtist>, TableCell<WatchedArtist, WatchedArtist>> {
-
 		@Override
 		public TableCell<WatchedArtist, WatchedArtist> call(TableColumn<WatchedArtist, WatchedArtist> param) {
 			return new TableCell<WatchedArtist, WatchedArtist>() {
@@ -74,6 +85,16 @@ public final class WatchedArtistCellValueFactory {
 						setText(null);
 					} else {
 						textProperty().bind(item.getLastRelease().albumNameProperty());
+						textFillProperty().bind(new ObjectBinding<Paint>() {
+
+							@Override
+							protected Paint computeValue() {
+								if (item.getLastRelease().isUpdated()) {
+									return Color.RED;
+								}
+								return Color.BLACK;
+							}
+						});
 					}
 				}
 			};

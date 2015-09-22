@@ -95,9 +95,8 @@ public final class MainView implements FxmlView<MainViewModel> {
 		tabPane.getSelectionModel().select(albumTabHandle);
 	}
 
-	public void showAutoHidingNotification(String icon, String text) {
-		String imagePath = MainViewModel.class.getResource("/com/github/kaiwinter/napsterreleases/ui/" + icon).toExternalForm();
-		ImageView image = new ImageView(imagePath);
+	public void showAutoHidingNotification(NotificationPaneIcon icon, String text) {
+		ImageView image = new ImageView(icon.getIconPath());
 		notificationPane.setGraphic(image);
 		notificationPane.setText(text);
 		notificationPane.show();
