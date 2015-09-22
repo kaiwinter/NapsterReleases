@@ -4,7 +4,7 @@ import java.util.prefs.Preferences;
 
 import javax.inject.Singleton;
 
-import com.github.kaiwinter.napsterreleases.ui.NapsterReleasesMain;
+import com.github.kaiwinter.napsterreleases.application.NapsterReleasesMain;
 
 /**
  * Stores user settings in the {@link Preferences}.

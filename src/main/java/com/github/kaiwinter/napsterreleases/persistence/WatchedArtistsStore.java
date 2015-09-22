@@ -13,8 +13,8 @@ import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.kaiwinter.napsterreleases.core.gson.LastReleaseDeserializer;
-import com.github.kaiwinter.napsterreleases.core.gson.LastReleaseSerializer;
+import com.github.kaiwinter.napsterreleases.persistence.gson.LastReleaseDeserializer;
+import com.github.kaiwinter.napsterreleases.persistence.gson.LastReleaseSerializer;
 import com.github.kaiwinter.napsterreleases.ui.model.WatchedArtist;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+
+<StackPane xmlns="http://javafx.com/javafx/8.0.51" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.kaiwinter.napsterreleases.ui.view.AlbumTabView">
+   <children>
+      <GridPane hgap="5.0" vgap="5.0">
+         <columnConstraints>
+            <ColumnConstraints hgrow="NEVER" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+         </rowConstraints>
+         <children>
+            <Label text="Name" GridPane.halignment="RIGHT" />
+            <Label text="Disc Count" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
+            <TextField fx:id="albumNameTf" editable="false" GridPane.columnIndex="1" />
+            <TextField fx:id="albumArtistTf" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <Label text="Artist" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+            <Label text="Type" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
+            <Label text="Tags" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
+            <Label text="Release Date" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
+            <Label text="Tracks" GridPane.halignment="RIGHT" GridPane.rowIndex="6" GridPane.valignment="TOP" />
+            <TextField fx:id="albumDiscCountTf" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <TextField fx:id="albumTypeTf" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+            <TextField fx:id="albumTagsTf" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+            <TextField fx:id="albumReleaseDateTf" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+            <TextArea fx:id="albumTracksTa" editable="false" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="6" />
+            <ImageView fx:id="albumImageIv" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowSpan="6" GridPane.valignment="CENTER" />
+         </children>
+         <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+         </padding>
+      </GridPane>
+      <Region fx:id="loadingIndicatorBackground" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="loading_indicator_background" stylesheets="@style.css"  visible="false"/>
+      <ProgressIndicator fx:id="loadingIndicator" maxHeight="60.0" maxWidth="60.0" visible="false" />
+   </children>
+</StackPane>
