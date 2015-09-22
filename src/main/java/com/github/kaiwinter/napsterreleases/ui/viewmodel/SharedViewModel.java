@@ -78,9 +78,9 @@ public class SharedViewModel {
 
 			@Override
 			public void failure(int status, String reason) {
-				Platform.runLater(() -> {
-					mainView.showAutoHidingNotification(NotificationPaneIcon.WARNING, "Authentication failed (" + status + ") - " + reason);
+				showAutoHidingNotification(NotificationPaneIcon.WARNING, "Authentication failed (" + status + ") - " + reason);
 
+				Platform.runLater(() -> {
 					authorize(actionCallback);
 				});
 			}
@@ -98,9 +98,9 @@ public class SharedViewModel {
 
 			@Override
 			public void success() {
-				Platform.runLater(() -> {
-					mainView.showAutoHidingNotification(NotificationPaneIcon.INFO, "Authentication successful");
+				showAutoHidingNotification(NotificationPaneIcon.INFO, "Authentication successful");
 
+				Platform.runLater(() -> {
 					actionCallback.retryAction();
 				});
 			}
@@ -126,6 +126,6 @@ public class SharedViewModel {
 	}
 
 	public void showAutoHidingNotification(NotificationPaneIcon icon, String message) {
-		mainView.showAutoHidingNotification(icon, message);
+		Platform.runLater(() -> mainView.showAutoHidingNotification(icon, message));
 	}
 }

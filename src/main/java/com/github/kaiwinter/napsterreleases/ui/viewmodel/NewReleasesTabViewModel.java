@@ -163,19 +163,18 @@ public final class NewReleasesTabViewModel implements ViewModel {
 	public void showNewReleases(GenreData genreData) {
 		loadingProperty().set(true);
 		Callback<Collection<AlbumData>> callback = new Callback<Collection<AlbumData>>() {
-
 			@Override
 			public void success(Collection<AlbumData> albums, Response response) {
 				LOGGER.info("Loaded {} albums", albums.size());
 				// Check if genre selection changed in the meantime
 				GenreData currentGenre = selectedGenreProperty().get().getValue();
 				if (currentGenre != null && currentGenre == genreData) {
+					@SuppressWarnings("unchecked")
+					ObservableList<AlbumData> items = (ObservableList<AlbumData>) FilterSupport.getUnwrappedList(releasesProperty().get());
 					Platform.runLater(() -> {
-						ObservableList<AlbumData> items = (ObservableList<AlbumData>) FilterSupport
-								.getUnwrappedList(releasesProperty().get());
 						items.setAll(albums);
-						loadingProperty().set(false);
 					});
+					loadingProperty().set(false);
 				} else {
 					LOGGER.info("Genre selection changed, not showing loaded data");
 				}

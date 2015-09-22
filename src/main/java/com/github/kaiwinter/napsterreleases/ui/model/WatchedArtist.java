@@ -2,12 +2,12 @@ package com.github.kaiwinter.napsterreleases.ui.model;
 
 import com.github.kaiwinter.rhapsody.model.AlbumData.Artist;
 
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 
 /**
  * Stores the last released album for an Artist.
@@ -42,7 +42,7 @@ public final class WatchedArtist {
 	public static final class LastRelease {
 		private final StringProperty date = new SimpleStringProperty();
 		private final StringProperty albumName = new SimpleStringProperty();
-		private final BooleanProperty updated = new SimpleBooleanProperty(false);
+		private final ObjectProperty<Paint> textColor = new SimpleObjectProperty<Paint>(Color.BLACK);
 
 		public StringProperty dateProperty() {
 			return this.date;
@@ -68,16 +68,16 @@ public final class WatchedArtist {
 			this.albumNameProperty().set(albumName);
 		}
 
-		public BooleanProperty updatedProperty() {
-			return this.updated;
+		public ObjectProperty<Paint> textColorProperty() {
+			return this.textColor;
 		}
 
-		public boolean isUpdated() {
-			return this.updatedProperty().get();
+		public Paint getTextColor() {
+			return this.textColorProperty().get();
 		}
 
-		public void setUpdated(boolean updated) {
-			this.updatedProperty().set(updated);
+		public void setTextColor(Paint updated) {
+			this.textColorProperty().set(updated);
 		}
 
 		@Override

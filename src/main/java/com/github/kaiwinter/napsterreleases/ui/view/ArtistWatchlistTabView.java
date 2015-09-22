@@ -27,7 +27,7 @@ public final class ArtistWatchlistTabView implements FxmlView<ArtistWatchlistTab
 	private TableView<WatchedArtist> artistsTv;
 
 	@FXML
-	private TableColumn<WatchedArtist, String> artistTc;
+	private TableColumn<WatchedArtist, WatchedArtist> artistTc;
 
 	@FXML
 	private TableColumn<WatchedArtist, WatchedArtist> releasedTc;
@@ -67,12 +67,13 @@ public final class ArtistWatchlistTabView implements FxmlView<ArtistWatchlistTab
 			return row;
 		});
 
-		artistTc.setCellValueFactory(new WatchedArtistCellValueFactory.NameValueFactory());
+		artistTc.setCellValueFactory(new WatchedArtistCellValueFactory.WatchedArtistValueFactory());
 		releasedTc.setCellValueFactory(new WatchedArtistCellValueFactory.WatchedArtistValueFactory());
 		albumTc.setCellValueFactory(new WatchedArtistCellValueFactory.WatchedArtistValueFactory());
 
-		releasedTc.setCellFactory(new WatchedArtistCellValueFactory.LastReleaseCellFactory());
-		albumTc.setCellFactory(new WatchedArtistCellValueFactory.AlbumNameCellFactory());
+		artistTc.setCellFactory(c -> new WatchedArtistCellValueFactory.ArtistNameCellFactory());
+		releasedTc.setCellFactory(c -> new WatchedArtistCellValueFactory.LastReleaseCellFactory());
+		albumTc.setCellFactory(c -> new WatchedArtistCellValueFactory.AlbumNameCellFactory());
 
 		viewModel.loadArtistWatchlist();
 	}

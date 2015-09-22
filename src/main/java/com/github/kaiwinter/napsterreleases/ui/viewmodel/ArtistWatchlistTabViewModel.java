@@ -19,6 +19,7 @@ import com.github.kaiwinter.rhapsody.model.AlbumData;
 import com.github.kaiwinter.rhapsody.model.AlbumData.Artist;
 
 import de.saxsys.mvvmfx.ViewModel;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -26,6 +27,8 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
+import javafx.concurrent.Task;
+import javafx.scene.paint.Color;
 
 @Singleton
 public final class ArtistWatchlistTabViewModel implements ViewModel {
@@ -51,6 +54,7 @@ public final class ArtistWatchlistTabViewModel implements ViewModel {
 		Set<WatchedArtist> watchedArtists = watchedArtistsStore.loadWatchedArtists();
 
 		ObservableList<WatchedArtist> sortedList = watchedArtistsProperty().get();
+		@SuppressWarnings("unchecked")
 		ObservableList<WatchedArtist> sourceList = (ObservableList<WatchedArtist>) ((SortedList<WatchedArtist>) sortedList).getSource();
 		sourceList.setAll(watchedArtists);
 	}
@@ -107,25 +111,41 @@ public final class ArtistWatchlistTabViewModel implements ViewModel {
 	public void checkForNewReleases() {
 		loadArtistWatchlist();
 
-		int updates = 0;
-		for (WatchedArtist watchedArtist : watchedArtists) {
-			LastRelease currentLastRelease = watchedArtist.getLastRelease();
-			LastRelease lastRelease = loadLastRelease(watchedArtist);
-			if (currentLastRelease != null) {
-				if (!currentLastRelease.equals(lastRelease)) {
-					currentLastRelease.setAlbumName(lastRelease.getAlbumName());
-					currentLastRelease.setDate(lastRelease.getDate());
-					currentLastRelease.setUpdated(true);
-					updates++;
+		watchedArtists.forEach(watchedArtist -> watchedArtist.getLastRelease().setTextColor(Color.LIGHTGRAY));
+
+		Task<Void> task = new UpdateWatchedArtistsTask();
+		new Thread(task).start();
+	}
+
+	private class UpdateWatchedArtistsTask extends Task<Void> {
+		@Override
+		protected Void call() throws Exception {
+			int updates = 0;
+			for (WatchedArtist watchedArtist : watchedArtists) {
+				LastRelease currentLastRelease = watchedArtist.getLastRelease();
+				LastRelease lastRelease = loadLastRelease(watchedArtist);
+				if (currentLastRelease != null) {
+					if (currentLastRelease.equals(lastRelease)) {
+						currentLastRelease.setTextColor(Color.BLACK);
+					} else {
+						updates++;
+						Platform.runLater(() -> {
+							currentLastRelease.setAlbumName(lastRelease.getAlbumName());
+							currentLastRelease.setDate(lastRelease.getDate());
+							currentLastRelease.setTextColor(Color.RED);
+						});
+					}
 				}
 			}
-		}
-		if (updates > 0) {
-			watchedArtistsStore.saveWatchedArtists(new HashSet<>(watchedArtists));
-			String message = MessageFormat
-					.format("There {0,choice, 1#is|1<are} {0,number,integer} new album {0,choice, 1#release|1<releases}", updates);
+			if (updates > 0) {
+				watchedArtistsStore.saveWatchedArtists(new HashSet<>(watchedArtists));
+				String message = MessageFormat
+						.format("There {0,choice, 1#is|1<are} {0,number,integer} new album {0,choice, 1#release|1<releases}", updates);
 
-			sharedViewModel.showAutoHidingNotification(NotificationPaneIcon.INFO, message);
+				sharedViewModel.showAutoHidingNotification(NotificationPaneIcon.INFO, message);
+			}
+
+			return null;
 		}
 	}
 }

@@ -17,8 +17,6 @@ import org.junit.Test;
 import com.github.kaiwinter.napsterreleases.persistence.WatchedArtistsStore;
 import com.github.kaiwinter.napsterreleases.ui.model.WatchedArtist;
 import com.github.kaiwinter.napsterreleases.ui.model.WatchedArtist.LastRelease;
-import com.github.kaiwinter.napsterreleases.ui.viewmodel.ArtistWatchlistTabViewModel;
-import com.github.kaiwinter.napsterreleases.ui.viewmodel.SharedViewModel;
 import com.github.kaiwinter.rhapsody.api.RhapsodySdkWrapper;
 import com.github.kaiwinter.rhapsody.model.AlbumData;
 import com.github.kaiwinter.rhapsody.model.AlbumData.Artist;
@@ -26,6 +24,8 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+
+import javafx.scene.paint.Color;
 
 /**
  * Tests for the {@link ArtistWatchlistTabViewModel}.
@@ -105,24 +105,28 @@ public final class ArtistWatchlistTabViewModelTest {
 	}
 
 	@Test
-	public void testChanged() {
+	public void testChanged() throws InterruptedException {
 		assertEquals("old album", watchedArtistChanged.getLastRelease().getAlbumName());
 
 		ArtistWatchlistTabViewModel viewModel = injector.getInstance(ArtistWatchlistTabViewModel.class);
 		viewModel.checkForNewReleases();
 
+		Thread.sleep(1000); // wait for task to finish
+
 		assertEquals("new album", watchedArtistChanged.getLastRelease().getAlbumName());
-		assertEquals(true, watchedArtistChanged.getLastRelease().isUpdated());
+		assertEquals(Color.RED, watchedArtistChanged.getLastRelease().getTextColor());
 	}
 
 	@Test
-	public void testUnchanged() {
+	public void testUnchanged() throws InterruptedException {
 		assertEquals("old album", watchedArtistUnchanged.getLastRelease().getAlbumName());
 
 		ArtistWatchlistTabViewModel viewModel = injector.getInstance(ArtistWatchlistTabViewModel.class);
 		viewModel.checkForNewReleases();
 
+		Thread.sleep(1000); // wait for task to finish
+
 		assertEquals("old album", watchedArtistUnchanged.getLastRelease().getAlbumName());
-		assertEquals(false, watchedArtistUnchanged.getLastRelease().isUpdated());
+		assertEquals(Color.BLACK, watchedArtistUnchanged.getLastRelease().getTextColor());
 	}
 }
