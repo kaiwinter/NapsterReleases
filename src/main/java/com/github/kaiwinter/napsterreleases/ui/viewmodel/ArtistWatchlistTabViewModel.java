@@ -30,7 +30,8 @@ import javafx.collections.transformation.SortedList;
 @Singleton
 public final class ArtistWatchlistTabViewModel implements ViewModel {
 	private final BooleanProperty loading = new SimpleBooleanProperty();
-	private final ListProperty<WatchedArtist> watchedArtists = new SimpleListProperty(FXCollections.observableArrayList().sorted());
+	private final ListProperty<WatchedArtist> watchedArtists = new SimpleListProperty<>(
+			FXCollections.<WatchedArtist> observableArrayList().sorted());
 
 	@Inject
 	private SharedViewModel sharedViewModel;
