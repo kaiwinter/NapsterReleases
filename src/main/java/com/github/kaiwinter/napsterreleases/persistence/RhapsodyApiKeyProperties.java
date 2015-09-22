@@ -11,7 +11,7 @@ import java.util.Properties;
  */
 public final class RhapsodyApiKeyProperties {
 
-	private static final String APIKEY_PROPERTIES_FILE = "../apikey.properties";
+	private static final String APIKEY_PROPERTIES_FILE = "apikey.properties";
 	private static final String PROPERTY_API_KEY = "rhapsody.api.key";
 	private static final String PROPERTY_API_SECRET = "rhapsody.api.secret";
 

@@ -2,4 +2,4 @@
 /.settings/
 /.classpath
 /.project
-/src/main/resources/com/github/kaiwinter/napsterreleases/apikey.properties
+/src/main/resources/com/github/kaiwinter/napsterreleases/persistence/apikey.properties

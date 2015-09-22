@@ -31,7 +31,6 @@ public class SharedViewModel {
 	@Inject
 	private MainView mainView;
 
-	@Inject
 	public SharedViewModel() throws IOException {
 		RhapsodyApiKeyProperties rhapsodyApiKeyConfig = new RhapsodyApiKeyProperties();
 		rhapsodySdkWrapper = new RhapsodySdkWrapper(rhapsodyApiKeyConfig.apiKey, rhapsodyApiKeyConfig.apiSecret,
