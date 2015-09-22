@@ -46,7 +46,7 @@ public final class ArtistWatchlistTabView implements FxmlView<ArtistWatchlistTab
 
 	@FXML
 	public void initialize() {
-		SortedList<WatchedArtist> sortedList = new SortedList<>(FXCollections.observableArrayList());
+		SortedList<WatchedArtist> sortedList = FXCollections.<WatchedArtist> observableArrayList().sorted();
 		artistsTv.setItems(sortedList);
 		sortedList.comparatorProperty().bind(artistsTv.comparatorProperty());
 		viewModel.watchedArtistsProperty().bindBidirectional(artistsTv.itemsProperty());
@@ -74,6 +74,17 @@ public final class ArtistWatchlistTabView implements FxmlView<ArtistWatchlistTab
 		artistTc.setCellFactory(c -> new WatchedArtistCellValueFactory.ArtistNameCellFactory());
 		releasedTc.setCellFactory(c -> new WatchedArtistCellValueFactory.LastReleaseCellFactory());
 		albumTc.setCellFactory(c -> new WatchedArtistCellValueFactory.AlbumNameCellFactory());
+
+		artistTc.setComparator((o1, o2) -> o1.getArtist().name.compareTo(o2.getArtist().name));
+		releasedTc.setComparator((o1, o2) -> {
+			int result = o1.getLastRelease().getDate().compareTo(o2.getLastRelease().getDate());
+			if (result == 0) {
+				// If dates are equal, keep previous sorting by artist name
+				result = artistTc.getComparator().compare(o1, o2);
+			}
+			return result;
+		});
+		albumTc.setComparator((o1, o2) -> o1.getLastRelease().getAlbumName().compareTo(o2.getLastRelease().getAlbumName()));
 
 		viewModel.loadArtistWatchlist();
 	}

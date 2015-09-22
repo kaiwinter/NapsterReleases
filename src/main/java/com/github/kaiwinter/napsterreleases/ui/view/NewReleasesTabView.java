@@ -86,6 +86,7 @@ public final class NewReleasesTabView implements FxmlView<NewReleasesTabViewMode
 		SortedList<AlbumData> sorted = FXCollections.<AlbumData> observableArrayList().filtered(null).sorted();
 		releasesTv.setItems(sorted);
 		sorted.comparatorProperty().bind(releasesTv.comparatorProperty());
+		viewModel.releasesProperty().bind(releasesTv.itemsProperty());
 
 		FilterSupport.addFilter(artistTc);
 		FilterSupport.addFilter(albumTc);
