@@ -65,6 +65,12 @@ public final class MainView implements FxmlView<MainViewModel> {
 	@FXML
 	private NotificationPane notificationPane;
 
+	@FXML
+	private Tab libraryTabHandle;
+
+	@FXML
+	private LibraryTabView libraryTabController;
+
 	@InjectViewModel
 	private MainViewModel mainViewModel;
 

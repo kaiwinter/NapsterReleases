@@ -130,9 +130,11 @@ public final class ArtistWatchlistTabViewModel implements ViewModel {
 					} else {
 						updates++;
 						Platform.runLater(() -> {
-							currentLastRelease.setAlbumName(lastRelease.getAlbumName());
-							currentLastRelease.setDate(lastRelease.getDate());
-							currentLastRelease.setTextColor(Color.RED);
+							if (lastRelease != null) {
+								currentLastRelease.setAlbumName(lastRelease.getAlbumName());
+								currentLastRelease.setDate(lastRelease.getDate());
+								currentLastRelease.setTextColor(Color.RED);
+							}
 						});
 					}
 				}

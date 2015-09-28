@@ -36,6 +36,11 @@
 		               	<fx:include fx:id="artistWatchlistTab" source="ArtistWatchlistTabView.fxml" />
 		               </content>
 		            </Tab>
+		            <Tab fx:id="libraryTabHandle" closable="false" text="Library">
+		               <content>
+		               	<fx:include fx:id="libraryTab" source="LibraryTabView.fxml" />
+		               </content>
+		            </Tab>
 		         </tabs>
 		      </TabPane>
 		   </center>

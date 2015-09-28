@@ -4,8 +4,10 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.github.kaiwinter.napsterreleases.ui.view.MainView;
+import com.github.kaiwinter.rhapsody.model.AlbumData;
 
 import de.saxsys.mvvmfx.ViewModel;
+import javafx.beans.value.ChangeListener;
 
 @Singleton
 public final class MainViewModel implements ViewModel {
@@ -20,11 +22,20 @@ public final class MainViewModel implements ViewModel {
 	private AlbumTabViewModel albumTabViewModel;
 
 	@Inject
+	private LibraryTabViewModel libraryTabViewModel;
+
+	@Inject
 	private MainView mainView;
 
 	public void bindSelectedAlbumProperty() {
-		artistTabViewModel.selectedAlbumProperty().bind(newReleasesTabViewModel.selectedAlbumProperty());
-		albumTabViewModel.selectedAlbumProperty().bind(newReleasesTabViewModel.selectedAlbumProperty());
+		// Use listener instead of binding to connect to sources with one target
+		ChangeListener<AlbumData> changeListener = (observable, oldValue, newValue) -> {
+			artistTabViewModel.selectedAlbumProperty().set(newValue);
+			albumTabViewModel.selectedAlbumProperty().set(newValue);
+		};
+
+		newReleasesTabViewModel.selectedAlbumProperty().addListener(changeListener);
+		libraryTabViewModel.selectedAlbumProperty().addListener(changeListener);
 	}
 
 	public void switchToArtistTab() {
