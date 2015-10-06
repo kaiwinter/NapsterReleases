@@ -134,10 +134,6 @@ public final class LibraryTabView implements FxmlView<LibraryTabViewModel> {
 
 		viewModel.loadingProperty().bindBidirectional(loadingIndicator.visibleProperty());
 		viewModel.loadingProperty().bindBidirectional(loadingIndicatorBackground.visibleProperty());
-
-		viewModel.artistColumVisibleProperty().bindBidirectional(artistTc.visibleProperty());
-		viewModel.albumColumVisibleProperty().bindBidirectional(albumTc.visibleProperty());
-		viewModel.releasedColumVisibleProperty().bindBidirectional(releasedTc.visibleProperty());
 	}
 
 	@FXML

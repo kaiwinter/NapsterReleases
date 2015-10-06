@@ -39,10 +39,6 @@ public final class LibraryTabViewModel implements ViewModel {
 	private final ObjectProperty<Artist> selectedArtist = new SimpleObjectProperty<>();
 	private final ObjectProperty<AlbumData> selectedAlbum = new SimpleObjectProperty<>();
 
-	private final BooleanProperty artistColumVisible = new SimpleBooleanProperty();
-	private final BooleanProperty albumColumVisible = new SimpleBooleanProperty();
-	private final BooleanProperty releasedColumVisible = new SimpleBooleanProperty();
-
 	@Inject
 	private SharedViewModel sharedViewModel;
 
@@ -64,18 +60,6 @@ public final class LibraryTabViewModel implements ViewModel {
 
 	public ObjectProperty<AlbumData> selectedAlbumProperty() {
 		return this.selectedAlbum;
-	}
-
-	public BooleanProperty artistColumVisibleProperty() {
-		return this.artistColumVisible;
-	}
-
-	public BooleanProperty albumColumVisibleProperty() {
-		return this.albumColumVisible;
-	}
-
-	public BooleanProperty releasedColumVisibleProperty() {
-		return this.releasedColumVisible;
 	}
 
 	public void loadAllArtistsInLibrary() {
