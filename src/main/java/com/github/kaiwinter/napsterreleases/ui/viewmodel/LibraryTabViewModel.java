@@ -63,6 +63,7 @@ public final class LibraryTabViewModel implements ViewModel {
 	}
 
 	public void loadAllArtistsInLibrary() {
+		artistsProperty().set(FXCollections.observableArrayList());
 		loadingProperty().set(true);
 		Callback<Collection<Artist>> callback = new Callback<Collection<Artist>>() {
 
@@ -71,7 +72,7 @@ public final class LibraryTabViewModel implements ViewModel {
 				LOGGER.info("Loaded {} artists", artists.size());
 				ObservableList<Artist> observableArrayList = FXCollections.observableArrayList(artists);
 				Comparator<Artist> comparator = (o1, o2) -> o1.name.compareTo(o2.name);
-				artistsProperty().set(observableArrayList.sorted(comparator));
+				Platform.runLater(() -> artistsProperty().set(observableArrayList.sorted(comparator)));
 				loadingProperty().set(false);
 			}
 
