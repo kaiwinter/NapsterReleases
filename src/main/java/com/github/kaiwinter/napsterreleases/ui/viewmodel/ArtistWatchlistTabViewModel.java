@@ -22,8 +22,10 @@ import de.saxsys.mvvmfx.ViewModel;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
@@ -35,6 +37,7 @@ public final class ArtistWatchlistTabViewModel implements ViewModel {
 	private final BooleanProperty loading = new SimpleBooleanProperty();
 	private final ListProperty<WatchedArtist> watchedArtists = new SimpleListProperty<>(
 			FXCollections.<WatchedArtist> observableArrayList().sorted());
+	private final ObjectProperty<WatchedArtist> selectedWatchedArtist = new SimpleObjectProperty<>();
 
 	@Inject
 	private SharedViewModel sharedViewModel;
@@ -48,6 +51,10 @@ public final class ArtistWatchlistTabViewModel implements ViewModel {
 
 	public ListProperty<WatchedArtist> watchedArtistsProperty() {
 		return this.watchedArtists;
+	}
+
+	public ObjectProperty<WatchedArtist> selectedWatchedArtistProperty() {
+		return this.selectedWatchedArtist;
 	}
 
 	public void loadArtistWatchlist() {
@@ -65,6 +72,7 @@ public final class ArtistWatchlistTabViewModel implements ViewModel {
 		if (artistNewReleases.size() > 0) {
 			AlbumData albumData = artistNewReleases.iterator().next();
 			LastRelease lastRelease = new LastRelease();
+			lastRelease.setId(albumData.id);
 			lastRelease.setAlbumName(albumData.name);
 			lastRelease.setDate(TimeUtil.timestampToString(albumData.released));
 			return lastRelease;
@@ -90,6 +98,7 @@ public final class ArtistWatchlistTabViewModel implements ViewModel {
 			watchedArtists.add(watchedArtist);
 			LastRelease lastRelease = loadLastRelease(watchedArtist);
 			if (lastRelease != null) {
+				watchedArtist.getLastRelease().setId(lastRelease.getId());
 				watchedArtist.getLastRelease().setAlbumName(lastRelease.getAlbumName());
 				watchedArtist.getLastRelease().setDate(lastRelease.getDate());
 			}
@@ -125,12 +134,13 @@ public final class ArtistWatchlistTabViewModel implements ViewModel {
 				LastRelease currentLastRelease = watchedArtist.getLastRelease();
 				LastRelease lastRelease = loadLastRelease(watchedArtist);
 				if (currentLastRelease != null) {
-					if (currentLastRelease.equals(lastRelease)) {
+					if (currentLastRelease.getId().equals(lastRelease.getId())) {
 						currentLastRelease.setTextColor(Color.BLACK);
 					} else {
 						updates++;
 						Platform.runLater(() -> {
 							if (lastRelease != null) {
+								currentLastRelease.setId(lastRelease.getId());
 								currentLastRelease.setAlbumName(lastRelease.getAlbumName());
 								currentLastRelease.setDate(lastRelease.getDate());
 								currentLastRelease.setTextColor(Color.RED);

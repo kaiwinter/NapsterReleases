@@ -40,6 +40,7 @@ public final class WatchedArtist {
 	 * The last released album and release date of an Artist.
 	 */
 	public static final class LastRelease {
+		private final StringProperty id = new SimpleStringProperty(); // The Rhapsody ID
 		private final StringProperty date = new SimpleStringProperty();
 		private final StringProperty albumName = new SimpleStringProperty();
 		private final ObjectProperty<Paint> textColor = new SimpleObjectProperty<Paint>(Color.BLACK);
@@ -80,36 +81,16 @@ public final class WatchedArtist {
 			this.textColorProperty().set(updated);
 		}
 
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((albumName.get() == null) ? 0 : albumName.get().hashCode());
-			result = prime * result + ((date.get() == null) ? 0 : date.get().hashCode());
-			return result;
+		public StringProperty idProperty() {
+			return this.id;
 		}
 
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			LastRelease other = (LastRelease) obj;
-			if (albumName.get() == null) {
-				if (other.albumName.get() != null)
-					return false;
-			} else if (!albumName.get().equals(other.albumName.get()))
-				return false;
-			if (date.get() == null) {
-				if (other.date.get() != null)
-					return false;
-			} else if (!date.get().equals(other.date.get()))
-				return false;
-			return true;
+		public String getId() {
+			return this.idProperty().get();
 		}
 
+		public void setId(String id) {
+			this.idProperty().set(id);
+		}
 	}
 }

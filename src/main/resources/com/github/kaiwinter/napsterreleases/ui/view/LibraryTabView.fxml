@@ -18,7 +18,7 @@
    <children>
       <HBox spacing="5.0" GridPane.columnSpan="2">
          <children>
-         	<Button mnemonicParsing="false" onAction="#loadAllAlbumsInLibrary" text="Reload Genres" />
+         	<Button mnemonicParsing="false" onAction="#loadAllAlbumsInLibrary" text="Reload Library" />
          </children>
          <GridPane.margin>
             <Insets />

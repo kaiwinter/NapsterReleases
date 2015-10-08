@@ -3,11 +3,14 @@ package com.github.kaiwinter.napsterreleases.ui.viewmodel;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.github.kaiwinter.napsterreleases.ui.model.WatchedArtist;
 import com.github.kaiwinter.napsterreleases.ui.view.MainView;
 import com.github.kaiwinter.rhapsody.model.AlbumData;
+import com.github.kaiwinter.rhapsody.model.AlbumData.Artist;
 
 import de.saxsys.mvvmfx.ViewModel;
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 
 @Singleton
 public final class MainViewModel implements ViewModel {
@@ -25,6 +28,9 @@ public final class MainViewModel implements ViewModel {
 	private LibraryTabViewModel libraryTabViewModel;
 
 	@Inject
+	private ArtistWatchlistTabViewModel artistWatchlistTabViewModel;
+
+	@Inject
 	private MainView mainView;
 
 	public void bindSelectedAlbumProperty() {
@@ -36,6 +42,19 @@ public final class MainViewModel implements ViewModel {
 
 		newReleasesTabViewModel.selectedAlbumProperty().addListener(changeListener);
 		libraryTabViewModel.selectedAlbumProperty().addListener(changeListener);
+		ChangeListener<WatchedArtist> listener = new ChangeListener<WatchedArtist>() {
+
+			@Override
+			public void changed(ObservableValue<? extends WatchedArtist> observable, WatchedArtist oldValue, WatchedArtist newValue) {
+				AlbumData albumData = new AlbumData();
+				albumData.id = newValue.getLastRelease().getId();
+				albumData.artist = new Artist();
+				albumData.artist.id = newValue.getArtist().id;
+				artistTabViewModel.selectedAlbumProperty().set(albumData);
+				albumTabViewModel.selectedAlbumProperty().set(albumData);
+			}
+		};
+		artistWatchlistTabViewModel.selectedWatchedArtistProperty().addListener(listener);
 	}
 
 	public void switchToArtistTab() {
