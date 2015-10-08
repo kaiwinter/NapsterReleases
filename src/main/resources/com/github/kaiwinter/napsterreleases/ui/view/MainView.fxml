@@ -41,6 +41,11 @@
 		               	<fx:include fx:id="libraryTab" source="LibraryTabView.fxml" />
 		               </content>
 		            </Tab>
+		            <Tab fx:id="chartsTabHandle" closable="false" text="Your Listening Charts">
+		               <content>
+		               	<fx:include fx:id="chartsTab" source="ChartsTabView.fxml" />
+		               </content>
+		            </Tab>
 		         </tabs>
 		      </TabPane>
 		   </center>

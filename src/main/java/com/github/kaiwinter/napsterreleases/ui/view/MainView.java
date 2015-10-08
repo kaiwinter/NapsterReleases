@@ -71,6 +71,12 @@ public final class MainView implements FxmlView<MainViewModel> {
 	@FXML
 	private LibraryTabView libraryTabController;
 
+	@FXML
+	private Tab chartsTabHandle;
+
+	@FXML
+	private ChartsTabView chartsTabController;
+
 	@InjectViewModel
 	private MainViewModel mainViewModel;
 
