@@ -15,6 +15,7 @@ import com.github.kaiwinter.rhapsody.model.AlbumData.Artist;
 import de.saxsys.mvvmfx.FxmlView;
 import de.saxsys.mvvmfx.InjectViewModel;
 import javafx.beans.binding.Bindings;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
@@ -76,7 +77,12 @@ public final class LibraryTabView implements FxmlView<LibraryTabViewModel> {
 		FilterSupport.addFilter(albumTc);
 		FilterSupport.addFilter(releasedTc);
 
-		loadAllAlbumsInLibrary();
+		viewModel.tabSelectedProperty().addListener((ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
+			// Automatically load if tab is selected and no data was loaded previously
+			if (newValue && artistLv.getItems().isEmpty()) {
+				loadAllAlbumsInLibrary();
+			}
+		});
 
 		artistLv.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
 			FilterSupport.getItems(releasesTv).clear();
@@ -93,7 +99,7 @@ public final class LibraryTabView implements FxmlView<LibraryTabViewModel> {
 			TableRow<AlbumData> row = new TableRow<>();
 			ContextMenu contextMenu = new AddArtistToWatchlistContextMenu(releasesTv, artistWatchlistTabViewModel);
 			row.contextMenuProperty()
-					.bind(Bindings.when(Bindings.isNotNull(row.itemProperty())).then(contextMenu).otherwise((ContextMenu) null));
+			.bind(Bindings.when(Bindings.isNotNull(row.itemProperty())).then(contextMenu).otherwise((ContextMenu) null));
 
 			return row;
 		});

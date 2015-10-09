@@ -4,6 +4,7 @@ import com.github.kaiwinter.napsterreleases.ui.viewmodel.ChartsTabViewModel;
 
 import de.saxsys.mvvmfx.FxmlView;
 import de.saxsys.mvvmfx.InjectViewModel;
+import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextArea;
@@ -36,6 +37,11 @@ public final class ChartsTabView implements FxmlView<ChartsTabViewModel> {
 		viewModel.artistsTextProperty().bindBidirectional(artistsTa.textProperty());
 		viewModel.albumTextProperty().bindBidirectional(albumsTa.textProperty());
 
-		viewModel.loadCharts();
+		viewModel.tabSelectedProperty().addListener((ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
+			// Automatically load if tab is selected and no data was loaded previously
+			if (newValue && artistsTa.getText().isEmpty()) {
+				viewModel.loadCharts();
+			}
+		});
 	}
 }

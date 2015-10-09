@@ -39,6 +39,8 @@ public final class LibraryTabViewModel implements ViewModel {
 	private final ObjectProperty<Artist> selectedArtist = new SimpleObjectProperty<>();
 	private final ObjectProperty<AlbumData> selectedAlbum = new SimpleObjectProperty<>();
 
+	private final BooleanProperty tabSelected = new SimpleBooleanProperty();
+
 	@Inject
 	private SharedViewModel sharedViewModel;
 
@@ -60,6 +62,10 @@ public final class LibraryTabViewModel implements ViewModel {
 
 	public ObjectProperty<AlbumData> selectedAlbumProperty() {
 		return this.selectedAlbum;
+	}
+
+	public BooleanProperty tabSelectedProperty() {
+		return this.tabSelected;
 	}
 
 	public void loadAllArtistsInLibrary() {

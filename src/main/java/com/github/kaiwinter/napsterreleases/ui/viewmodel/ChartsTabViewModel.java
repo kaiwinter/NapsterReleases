@@ -32,6 +32,8 @@ public final class ChartsTabViewModel implements ViewModel {
 	private final StringProperty artistsText = new SimpleStringProperty();
 	private final StringProperty albumText = new SimpleStringProperty();
 
+	private final BooleanProperty tabSelected = new SimpleBooleanProperty();
+
 	@Inject
 	private SharedViewModel sharedViewModel;
 
@@ -89,6 +91,7 @@ public final class ChartsTabViewModel implements ViewModel {
 			@Override
 			public void failure(RetrofitError error) {
 				LOGGER.error(error.getMessage(), error);
+				sharedViewModel.handleError(error, () -> loadCharts());
 				loading.set(false);
 			}
 		};
@@ -101,5 +104,9 @@ public final class ChartsTabViewModel implements ViewModel {
 
 	public StringProperty albumTextProperty() {
 		return this.albumText;
+	}
+
+	public BooleanProperty tabSelectedProperty() {
+		return this.tabSelected;
 	}
 }

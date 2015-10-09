@@ -12,7 +12,10 @@ import org.controlsfx.dialog.LoginDialog;
 import com.github.kaiwinter.napsterreleases.ui.NotificationPaneIcon;
 import com.github.kaiwinter.napsterreleases.ui.viewmodel.AlbumTabViewModel;
 import com.github.kaiwinter.napsterreleases.ui.viewmodel.ArtistTabViewModel;
+import com.github.kaiwinter.napsterreleases.ui.viewmodel.ChartsTabViewModel;
+import com.github.kaiwinter.napsterreleases.ui.viewmodel.LibraryTabViewModel;
 import com.github.kaiwinter.napsterreleases.ui.viewmodel.MainViewModel;
+import com.github.kaiwinter.napsterreleases.ui.viewmodel.NewReleasesTabViewModel;
 
 import de.saxsys.mvvmfx.FxmlView;
 import de.saxsys.mvvmfx.InjectViewModel;
@@ -40,6 +43,9 @@ public final class MainView implements FxmlView<MainViewModel> {
 
 	@FXML
 	private TabPane tabPane;
+
+	@FXML
+	private Tab newReleasesTabHandle;
 
 	@FXML
 	private Tab artistTabHandle;
@@ -86,6 +92,15 @@ public final class MainView implements FxmlView<MainViewModel> {
 	@Inject
 	private AlbumTabViewModel albumTabViewModel;
 
+	@Inject
+	private ChartsTabViewModel chartsTabViewModel;
+
+	@Inject
+	private LibraryTabViewModel libraryTabViewModel;
+
+	@Inject
+	private NewReleasesTabViewModel newReleasesTabViewModel;
+
 	@FXML
 	private void initialize() throws IOException {
 
@@ -102,6 +117,10 @@ public final class MainView implements FxmlView<MainViewModel> {
 		});
 
 		mainViewModel.bindSelectedAlbumProperty();
+
+		chartsTabViewModel.tabSelectedProperty().bind(chartsTabHandle.selectedProperty());
+		libraryTabViewModel.tabSelectedProperty().bind(libraryTabHandle.selectedProperty());
+		newReleasesTabViewModel.tabSelectedProperty().bind(newReleasesTabHandle.selectedProperty());
 	}
 
 	public void switchToArtistTab() {

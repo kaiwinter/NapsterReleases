@@ -52,6 +52,8 @@ public final class NewReleasesTabViewModel implements ViewModel {
 	private final BooleanProperty typeColumVisible = new SimpleBooleanProperty();
 	private final BooleanProperty discsColumVisible = new SimpleBooleanProperty();
 
+	private final BooleanProperty tabSelected = new SimpleBooleanProperty();
+
 	@Inject
 	private SharedViewModel sharedViewModel;
 
@@ -102,6 +104,10 @@ public final class NewReleasesTabViewModel implements ViewModel {
 
 	public BooleanProperty discsColumVisibleProperty() {
 		return this.discsColumVisible;
+	}
+
+	public BooleanProperty tabSelectedProperty() {
+		return this.tabSelected;
 	}
 
 	private void clearData() {

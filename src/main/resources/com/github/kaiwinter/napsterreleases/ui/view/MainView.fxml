@@ -16,7 +16,7 @@
 		   <center>
 		      <TabPane fx:id="tabPane">
 		         <tabs>
-		            <Tab closable="false" text="Genres: New Releases">
+		            <Tab fx:id="newReleasesTabHandle" closable="false" text="Genres: New Releases">
 		               <content>
 		      			<fx:include fx:id="newReleasesTab" source="NewReleasesTabView.fxml" />
 		               </content>

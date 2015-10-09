@@ -15,6 +15,7 @@ import com.github.kaiwinter.rhapsody.model.GenreData;
 import de.saxsys.mvvmfx.FxmlView;
 import de.saxsys.mvvmfx.InjectViewModel;
 import javafx.beans.binding.Bindings;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
@@ -93,7 +94,6 @@ public final class NewReleasesTabView implements FxmlView<NewReleasesTabViewMode
 		FilterSupport.addFilter(releasedTc);
 		FilterSupport.addFilter(typeTc);
 
-		loadGenres();
 		viewModel.loadColumnVisibility();
 		viewModel.addColumnVisibilityListeners();
 	}
@@ -118,7 +118,7 @@ public final class NewReleasesTabView implements FxmlView<NewReleasesTabViewMode
 			TableRow<AlbumData> row = new TableRow<>();
 			ContextMenu contextMenu = new AddArtistToWatchlistContextMenu(releasesTv, artistWatchlistTabViewModel);
 			row.contextMenuProperty()
-					.bind(Bindings.when(Bindings.isNotNull(row.itemProperty())).then(contextMenu).otherwise((ContextMenu) null));
+			.bind(Bindings.when(Bindings.isNotNull(row.itemProperty())).then(contextMenu).otherwise((ContextMenu) null));
 
 			return row;
 		});
@@ -129,8 +129,8 @@ public final class NewReleasesTabView implements FxmlView<NewReleasesTabViewMode
 		typeTc.setCellValueFactory(new AlbumDataCellValueFactories.TypeValueFactory());
 		discsTc.setCellValueFactory(new AlbumDataCellValueFactories.DiscCountValueFactory());
 
-		artistTc.setCellFactory(new DoubleClickListenerCellFactory(() -> mainViewModel.switchToArtistTab()));
-		albumTc.setCellFactory(new DoubleClickListenerCellFactory(() -> mainViewModel.switchToAlbumTab()));
+		artistTc.setCellFactory(new DoubleClickListenerCellFactory<AlbumData, String>(() -> mainViewModel.switchToArtistTab()));
+		albumTc.setCellFactory(new DoubleClickListenerCellFactory<AlbumData, String>(() -> mainViewModel.switchToAlbumTab()));
 	}
 
 	private void bindProperties() {
@@ -149,6 +149,13 @@ public final class NewReleasesTabView implements FxmlView<NewReleasesTabViewMode
 		viewModel.releasedColumVisibleProperty().bindBidirectional(releasedTc.visibleProperty());
 		viewModel.typeColumVisibleProperty().bindBidirectional(typeTc.visibleProperty());
 		viewModel.discsColumVisibleProperty().bindBidirectional(discsTc.visibleProperty());
+
+		viewModel.tabSelectedProperty().addListener((ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
+			// Automatically load if tab is selected and no data was loaded previously
+			if (newValue && genreList.getRoot() == null) {
+				loadGenres();
+			}
+		});
 	}
 
 	@FXML
