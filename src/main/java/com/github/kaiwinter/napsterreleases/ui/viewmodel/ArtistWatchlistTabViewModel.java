@@ -4,11 +4,15 @@ import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.github.kaiwinter.napsterreleases.persistence.WatchedArtistsStore;
 import com.github.kaiwinter.napsterreleases.ui.NotificationPaneIcon;
@@ -34,6 +38,8 @@ import javafx.scene.paint.Color;
 
 @Singleton
 public final class ArtistWatchlistTabViewModel implements ViewModel {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ArtistWatchlistTabViewModel.class.getSimpleName());
+
 	private final BooleanProperty loading = new SimpleBooleanProperty();
 	private final ListProperty<WatchedArtist> watchedArtists = new SimpleListProperty<>(
 			FXCollections.<WatchedArtist> observableArrayList().sorted());
@@ -134,7 +140,8 @@ public final class ArtistWatchlistTabViewModel implements ViewModel {
 				LastRelease currentLastRelease = watchedArtist.getLastRelease();
 				LastRelease lastRelease = loadLastRelease(watchedArtist);
 				if (currentLastRelease != null) {
-					if (currentLastRelease.getId().equals(lastRelease.getId())) {
+
+					if (Objects.equals(currentLastRelease.getId(), lastRelease == null ? null : lastRelease.getId())) {
 						currentLastRelease.setTextColor(Color.BLACK);
 					} else {
 						updates++;
@@ -158,6 +165,12 @@ public final class ArtistWatchlistTabViewModel implements ViewModel {
 			}
 
 			return null;
+		}
+
+		@Override
+		protected void failed() {
+			super.failed();
+			LOGGER.error(getException().getMessage(), getException());
 		}
 	}
 }

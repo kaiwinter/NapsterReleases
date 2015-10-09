@@ -46,6 +46,9 @@ public final class MainViewModel implements ViewModel {
 
 			@Override
 			public void changed(ObservableValue<? extends WatchedArtist> observable, WatchedArtist oldValue, WatchedArtist newValue) {
+				if (newValue == null) {
+					return;
+				}
 				AlbumData albumData = new AlbumData();
 				albumData.id = newValue.getLastRelease().getId();
 				albumData.artist = new Artist();

@@ -101,12 +101,11 @@ public final class AlbumTabViewModel implements ViewModel {
 
 	public void showAlbum() {
 		AlbumData albumData = selectedAlbum.get();
-		if (albumData == null) {
+		if (albumData == null || albumData.id == null) {
 			return;
 		}
-		String albumId = albumData.id;
 		loadingProperty().set(true);
-		sharedViewModel.getRhapsodySdkWrapper().loadAlbum(albumId, new Callback<AlbumData>() {
+		sharedViewModel.getRhapsodySdkWrapper().loadAlbum(albumData.id, new Callback<AlbumData>() {
 
 			@Override
 			public void success(AlbumData albumData, Response response) {
