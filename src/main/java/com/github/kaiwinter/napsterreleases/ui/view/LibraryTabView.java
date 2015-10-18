@@ -3,7 +3,7 @@ package com.github.kaiwinter.napsterreleases.ui.view;
 import javax.inject.Inject;
 
 import com.github.kaiwinter.jfx.tablecolumn.filter.FilterSupport;
-import com.github.kaiwinter.napsterreleases.ui.AddArtistToWatchlistContextMenu;
+import com.github.kaiwinter.napsterreleases.ui.AddToWatchlistMenuItem;
 import com.github.kaiwinter.napsterreleases.ui.AlbumDataCellValueFactories;
 import com.github.kaiwinter.napsterreleases.ui.DoubleClickListenerCellFactory;
 import com.github.kaiwinter.napsterreleases.ui.viewmodel.ArtistWatchlistTabViewModel;
@@ -22,6 +22,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -97,7 +98,14 @@ public final class LibraryTabView implements FxmlView<LibraryTabViewModel> {
 	private void setFactories() {
 		releasesTv.setRowFactory(tv -> {
 			TableRow<AlbumData> row = new TableRow<>();
-			ContextMenu contextMenu = new AddArtistToWatchlistContextMenu(releasesTv, artistWatchlistTabViewModel);
+			ContextMenu contextMenu = new ContextMenu();
+			contextMenu.getItems().add(new AddToWatchlistMenuItem(releasesTv, artistWatchlistTabViewModel));
+			MenuItem removeMenuItem = new MenuItem("Remove from Library");
+			removeMenuItem.setOnAction(event -> {
+				AlbumData albumData = releasesTv.getSelectionModel().getSelectedItem();
+				viewModel.removeArtistFromLibrary(albumData);
+			});
+			contextMenu.getItems().add(removeMenuItem);
 			row.contextMenuProperty()
 			.bind(Bindings.when(Bindings.isNotNull(row.itemProperty())).then(contextMenu).otherwise((ContextMenu) null));
 
@@ -128,8 +136,8 @@ public final class LibraryTabView implements FxmlView<LibraryTabViewModel> {
 		albumTc.setCellValueFactory(new AlbumDataCellValueFactories.AlbumNameValueFactory());
 		releasedTc.setCellValueFactory(new AlbumDataCellValueFactories.ReleaseDateValueFactory());
 
-		artistTc.setCellFactory(new DoubleClickListenerCellFactory(() -> mainViewModel.switchToArtistTab()));
-		albumTc.setCellFactory(new DoubleClickListenerCellFactory(() -> mainViewModel.switchToAlbumTab()));
+		artistTc.setCellFactory(new DoubleClickListenerCellFactory<AlbumData, String>(() -> mainViewModel.switchToArtistTab()));
+		albumTc.setCellFactory(new DoubleClickListenerCellFactory<AlbumData, String>(() -> mainViewModel.switchToAlbumTab()));
 	}
 
 	private void bindProperties() {
@@ -147,4 +155,13 @@ public final class LibraryTabView implements FxmlView<LibraryTabViewModel> {
 		viewModel.loadAllArtistsInLibrary();
 	}
 
+	@FXML
+	private void exportLibrary() {
+		viewModel.exportLibrary();
+	}
+
+	@FXML
+	private void importLibrary() {
+		viewModel.importLibrary();
+	}
 }

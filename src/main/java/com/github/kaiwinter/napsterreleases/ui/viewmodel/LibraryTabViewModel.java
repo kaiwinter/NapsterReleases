@@ -1,17 +1,25 @@
 package com.github.kaiwinter.napsterreleases.ui.viewmodel;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Comparator;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.controlsfx.dialog.ExceptionDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.kaiwinter.jfx.tablecolumn.filter.FilterSupport;
 import com.github.kaiwinter.rhapsody.model.AlbumData;
 import com.github.kaiwinter.rhapsody.model.AlbumData.Artist;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
 import de.saxsys.mvvmfx.ViewModel;
 import javafx.application.Platform;
@@ -23,6 +31,8 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -100,8 +110,8 @@ public final class LibraryTabViewModel implements ViewModel {
 			public void success(Collection<AlbumData> albums, Response response) {
 				LOGGER.info("Loaded {} albums", albums.size());
 				// Check if selection changed in the meantime
-				Artist currentGenre = selectedArtistProperty().get();
-				if (currentGenre != null && currentGenre == artist) {
+				Artist currentArtist = selectedArtistProperty().get();
+				if (currentArtist != null && currentArtist.id.equals(artist.id)) {
 					ObservableList<AlbumData> items = (ObservableList<AlbumData>) FilterSupport.getUnwrappedList(releasesProperty().get());
 					Platform.runLater(() -> items.setAll(albums));
 				} else {
@@ -118,5 +128,97 @@ public final class LibraryTabViewModel implements ViewModel {
 			}
 		};
 		sharedViewModel.getRhapsodySdkWrapper().loadAllAlbumsByArtistInLibrary(artist.id, null, callback);
+	}
+
+	public void exportLibrary() {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setInitialFileName("library_export.json");
+		fileChooser.getExtensionFilters().add(new ExtensionFilter("JSON File", "*.json"));
+		File file = fileChooser.showSaveDialog(sharedViewModel.getPrimaryStage());
+		if (file == null) {
+			return;
+		}
+
+		loadingProperty().set(true);
+		Callback<Collection<AlbumData>> callback = new Callback<Collection<AlbumData>>() {
+			@Override
+			public void success(Collection<AlbumData> albums, Response response) {
+				loadingProperty().set(false);
+
+				// reduce data
+				albums.forEach(e -> {
+					e.type = null;
+					e.tags = null;
+					e.images = null;
+					e.discCount = null;
+					e.released = null;
+				});
+
+				try (FileWriter fileWriter = new FileWriter(file)) {
+					Type listOfTestObject = new TypeToken<Collection<AlbumData>>() {
+					}.getType();
+
+					Gson gson = new GsonBuilder().setPrettyPrinting().create();
+					gson.toJson(albums, listOfTestObject, fileWriter);
+				} catch (IOException e) {
+					LOGGER.error(e.getMessage(), e);
+				}
+			}
+
+			@Override
+			public void failure(RetrofitError error) {
+				LOGGER.error(error.getMessage(), error);
+				loadingProperty().set(false);
+				Platform.runLater(() -> {
+					ExceptionDialog exceptionDialog = new ExceptionDialog(error);
+					exceptionDialog.show();
+				});
+			}
+		};
+		sharedViewModel.getRhapsodySdkWrapper().loadAllAlbumsInLibrary(null, callback);
+	}
+
+	public void importLibrary() {
+		// FIXME KW Auto-generated method stub
+
+	}
+
+	public void removeArtistFromLibrary(AlbumData albumData) {
+		loadingProperty().set(true);
+		Callback<Void> callback = new Callback<Void>() {
+
+			@Override
+			public void success(Void t, Response response) {
+				loadingProperty().set(false);
+				loadAlbumsOfSelectedArtist(albumData.artist);
+			}
+
+			@Override
+			public void failure(RetrofitError error) {
+				LOGGER.error(error.getMessage(), error);
+				loadingProperty().set(false);
+				sharedViewModel.handleError(error, () -> removeArtistFromLibrary(albumData));
+			}
+		};
+		sharedViewModel.getRhapsodySdkWrapper().removeAlbumFromLibrary(albumData.id, callback);
+	}
+
+	public void addAlbumToLibrary(AlbumData albumData) {
+		Callback<Void> callback = new Callback<Void>() {
+
+			@Override
+			public void success(Void t, Response response) {
+				loadingProperty().set(false);
+				loadAlbumsOfSelectedArtist(albumData.artist);
+			}
+
+			@Override
+			public void failure(RetrofitError error) {
+				LOGGER.error(error.getMessage(), error);
+				loadingProperty().set(false);
+				sharedViewModel.handleError(error, () -> removeArtistFromLibrary(albumData));
+			}
+		};
+		sharedViewModel.getRhapsodySdkWrapper().addAlbumToLibrary(albumData.id, callback);
 	}
 }

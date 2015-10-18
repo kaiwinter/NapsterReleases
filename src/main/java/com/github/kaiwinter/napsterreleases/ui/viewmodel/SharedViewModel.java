@@ -16,6 +16,7 @@ import com.github.kaiwinter.rhapsody.api.RhapsodySdkWrapper;
 import com.github.kaiwinter.rhapsody.persistence.impl.PreferencesAuthorizationStore;
 
 import javafx.application.Platform;
+import javafx.stage.Window;
 import javafx.util.Pair;
 import retrofit.RetrofitError;
 
@@ -31,10 +32,14 @@ public class SharedViewModel {
 	@Inject
 	private MainView mainView;
 
+	@Inject
+	private MainViewModel mainViewModel;
+
 	public SharedViewModel() throws IOException {
 		RhapsodyApiKeyProperties rhapsodyApiKeyConfig = new RhapsodyApiKeyProperties();
 		rhapsodySdkWrapper = new RhapsodySdkWrapper(rhapsodyApiKeyConfig.apiKey, rhapsodyApiKeyConfig.apiSecret,
 				new PreferencesAuthorizationStore());
+		//rhapsodySdkWrapper.setVerboseLoggingEnabled(true);
 	}
 
 	/**
@@ -126,5 +131,9 @@ public class SharedViewModel {
 
 	public void showAutoHidingNotification(NotificationPaneIcon icon, String message) {
 		Platform.runLater(() -> mainView.showAutoHidingNotification(icon, message));
+	}
+
+	public Window getPrimaryStage() {
+		return mainViewModel.getPrimarySage();
 	}
 }

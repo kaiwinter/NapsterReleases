@@ -33,6 +33,8 @@ public final class NapsterReleasesMain extends MvvmfxGuiceApplication {
 		ViewTuple<MainView, MainViewModel> viewTuple = FluentViewLoader.fxmlView(MainView.class).load();
 		Parent root = viewTuple.getView();
 
+		viewTuple.getViewModel().setPrimaryStage(primaryStage);
+
 		Scene scene = new Scene(root);
 		primaryStage.setScene(scene);
 		primaryStage.setTitle("Napster New Releases");

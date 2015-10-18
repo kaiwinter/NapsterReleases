@@ -11,6 +11,7 @@ import com.github.kaiwinter.rhapsody.model.AlbumData.Artist;
 import de.saxsys.mvvmfx.ViewModel;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.stage.Stage;
 
 @Singleton
 public final class MainViewModel implements ViewModel {
@@ -32,6 +33,8 @@ public final class MainViewModel implements ViewModel {
 
 	@Inject
 	private MainView mainView;
+
+	private Stage primaryStage;
 
 	public void bindSelectedAlbumProperty() {
 		// Use listener instead of binding to connect to sources with one target
@@ -66,5 +69,13 @@ public final class MainViewModel implements ViewModel {
 
 	public void switchToAlbumTab() {
 		mainView.switchToAlbumTab();
+	}
+
+	public void setPrimaryStage(Stage primaryStage) {
+		this.primaryStage = primaryStage;
+	}
+
+	public Stage getPrimarySage() {
+		return primaryStage;
 	}
 }

@@ -19,6 +19,8 @@
       <HBox spacing="5.0" GridPane.columnSpan="2">
          <children>
          	<Button mnemonicParsing="false" onAction="#loadAllAlbumsInLibrary" text="Reload Library" />
+            <Button mnemonicParsing="false" onAction="#exportLibrary" text="Export" />
+            <Button mnemonicParsing="false" onAction="#importLibrary" text="Import" />
          </children>
          <GridPane.margin>
             <Insets />
@@ -26,10 +28,10 @@
       </HBox>
       <StackPane GridPane.columnIndex="1" GridPane.rowSpan="2">
          <children>
-            <TableView fx:id="releasesTv" prefHeight="439.0" prefWidth="459.0" >
+            <TableView fx:id="releasesTv" prefHeight="439.0" prefWidth="459.0">
               <columns>
                 <TableColumn fx:id="artistTc" editable="false" prefWidth="75.0" text="Artist" />
-                <TableColumn fx:id="albumTc" editable="false" prefWidth="75.0" text="Album" sortType="ASCENDING" />
+                <TableColumn fx:id="albumTc" editable="false" prefWidth="75.0" sortType="ASCENDING" text="Album" />
                 <TableColumn fx:id="releasedTc" editable="false" prefWidth="75.0" text="Released" />
               </columns>
                <columnResizePolicy>

@@ -3,10 +3,12 @@ package com.github.kaiwinter.napsterreleases.ui.view;
 import javax.inject.Inject;
 
 import com.github.kaiwinter.jfx.tablecolumn.filter.FilterSupport;
-import com.github.kaiwinter.napsterreleases.ui.AddArtistToWatchlistContextMenu;
+import com.github.kaiwinter.napsterreleases.ui.AddToLibraryMenuItem;
+import com.github.kaiwinter.napsterreleases.ui.AddToWatchlistMenuItem;
 import com.github.kaiwinter.napsterreleases.ui.AlbumDataCellValueFactories;
 import com.github.kaiwinter.napsterreleases.ui.DoubleClickListenerCellFactory;
 import com.github.kaiwinter.napsterreleases.ui.viewmodel.ArtistWatchlistTabViewModel;
+import com.github.kaiwinter.napsterreleases.ui.viewmodel.LibraryTabViewModel;
 import com.github.kaiwinter.napsterreleases.ui.viewmodel.MainViewModel;
 import com.github.kaiwinter.napsterreleases.ui.viewmodel.NewReleasesTabViewModel;
 import com.github.kaiwinter.rhapsody.model.AlbumData;
@@ -65,6 +67,9 @@ public final class NewReleasesTabView implements FxmlView<NewReleasesTabViewMode
 	@Inject
 	private ArtistWatchlistTabViewModel artistWatchlistTabViewModel;
 
+	@Inject
+	private LibraryTabViewModel libraryTabViewModel;
+
 	@InjectViewModel
 	private NewReleasesTabViewModel viewModel;
 
@@ -116,7 +121,9 @@ public final class NewReleasesTabView implements FxmlView<NewReleasesTabViewMode
 
 		releasesTv.setRowFactory(tv -> {
 			TableRow<AlbumData> row = new TableRow<>();
-			ContextMenu contextMenu = new AddArtistToWatchlistContextMenu(releasesTv, artistWatchlistTabViewModel);
+			ContextMenu contextMenu = new ContextMenu();
+			contextMenu.getItems().add(new AddToWatchlistMenuItem(releasesTv, artistWatchlistTabViewModel));
+			contextMenu.getItems().add(new AddToLibraryMenuItem(releasesTv, libraryTabViewModel));
 			row.contextMenuProperty()
 			.bind(Bindings.when(Bindings.isNotNull(row.itemProperty())).then(contextMenu).otherwise((ContextMenu) null));
 
