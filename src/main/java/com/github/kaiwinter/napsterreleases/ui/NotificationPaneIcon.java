@@ -8,17 +8,17 @@ import java.util.Objects;
  */
 public enum NotificationPaneIcon {
 
-	INFO(NotificationPaneIcon.class.getResource("notification-pane-info.png")), //
-	WARNING(NotificationPaneIcon.class.getResource("notification-pane-warning.png"));
+   INFO(NotificationPaneIcon.class.getResource("notification-pane-info.png")), //
+   WARNING(NotificationPaneIcon.class.getResource("notification-pane-warning.png"));
 
-	private final String iconPath;
+   private final String iconPath;
 
-	private NotificationPaneIcon(URL iconPath) {
-		Objects.requireNonNull(iconPath, "Could not find notification icon at the specified path");
-		this.iconPath = iconPath.toExternalForm();
-	}
+   private NotificationPaneIcon(URL iconPath) {
+      Objects.requireNonNull(iconPath, "Could not find notification icon at the specified path");
+      this.iconPath = iconPath.toExternalForm();
+   }
 
-	public String getIconPath() {
-		return iconPath;
-	}
+   public String getIconPath() {
+      return iconPath;
+   }
 }

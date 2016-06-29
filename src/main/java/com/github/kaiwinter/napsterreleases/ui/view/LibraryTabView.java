@@ -35,133 +35,134 @@ import javafx.util.Callback;
  */
 public final class LibraryTabView implements FxmlView<LibraryTabViewModel> {
 
-	@FXML
-	private ListView<Artist> artistLv;
+   @FXML
+   private ListView<Artist> artistLv;
 
-	@FXML
-	private TableView<AlbumData> releasesTv;
+   @FXML
+   private TableView<AlbumData> releasesTv;
 
-	@FXML
-	private TableColumn<AlbumData, String> artistTc;
-	@FXML
-	private TableColumn<AlbumData, String> albumTc;
-	@FXML
-	private TableColumn<AlbumData, String> releasedTc;
+   @FXML
+   private TableColumn<AlbumData, String> artistTc;
+   @FXML
+   private TableColumn<AlbumData, String> albumTc;
+   @FXML
+   private TableColumn<AlbumData, String> releasedTc;
 
-	@FXML
-	private ProgressIndicator loadingIndicator;
-	@FXML
-	private Region loadingIndicatorBackground;
+   @FXML
+   private ProgressIndicator loadingIndicator;
+   @FXML
+   private Region loadingIndicatorBackground;
 
-	@Inject
-	private MainViewModel mainViewModel;
+   @Inject
+   private MainViewModel mainViewModel;
 
-	@Inject
-	private ArtistWatchlistTabViewModel artistWatchlistTabViewModel;
+   @Inject
+   private ArtistWatchlistTabViewModel artistWatchlistTabViewModel;
 
-	@InjectViewModel
-	private LibraryTabViewModel viewModel;
+   @InjectViewModel
+   private LibraryTabViewModel viewModel;
 
-	@FXML
-	public void initialize() {
-		bindProperties();
-		setFactories();
+   @FXML
+   public void initialize() {
+      bindProperties();
+      setFactories();
 
-		SortedList<AlbumData> sorted = FXCollections.<AlbumData> observableArrayList().filtered(null).sorted();
-		releasesTv.setItems(sorted);
-		sorted.comparatorProperty().bind(releasesTv.comparatorProperty());
-		viewModel.releasesProperty().bind(releasesTv.itemsProperty());
+      SortedList<AlbumData> sorted = FXCollections.<AlbumData> observableArrayList().filtered(null).sorted();
+      releasesTv.setItems(sorted);
+      sorted.comparatorProperty().bind(releasesTv.comparatorProperty());
+      viewModel.releasesProperty().bind(releasesTv.itemsProperty());
 
-		viewModel.artistsProperty().bindBidirectional(artistLv.itemsProperty());
+      viewModel.artistsProperty().bindBidirectional(artistLv.itemsProperty());
 
-		FilterSupport.addFilter(artistTc);
-		FilterSupport.addFilter(albumTc);
-		FilterSupport.addFilter(releasedTc);
+      FilterSupport.addFilter(artistTc);
+      FilterSupport.addFilter(albumTc);
+      FilterSupport.addFilter(releasedTc);
 
-		viewModel.tabSelectedProperty().addListener((ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
-			// Automatically load if tab is selected and no data was loaded previously
-			if (newValue && artistLv.getItems().isEmpty()) {
-				loadAllAlbumsInLibrary();
-			}
-		});
+      viewModel.tabSelectedProperty().addListener((ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
+         // Automatically load if tab is selected and no data was loaded previously
+         if (newValue && artistLv.getItems().isEmpty()) {
+            loadAllAlbumsInLibrary();
+         }
+      });
 
-		artistLv.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-			FilterSupport.getItems(releasesTv).clear();
+      artistLv.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+         FilterSupport.getItems(releasesTv).clear();
 
-			if (newValue == null) {
-			} else {
-				viewModel.loadAlbumsOfSelectedArtist(newValue);
-			}
-		});
-	}
+         if (newValue != null) {
+            viewModel.loadAlbumsOfSelectedArtist(newValue);
+         }
+      });
+   }
 
-	private void setFactories() {
-		releasesTv.setRowFactory(tv -> {
-			TableRow<AlbumData> row = new TableRow<>();
-			ContextMenu contextMenu = new ContextMenu();
-			contextMenu.getItems().add(new AddToWatchlistMenuItem(releasesTv, artistWatchlistTabViewModel));
-			MenuItem removeMenuItem = new MenuItem("Remove from Library");
-			removeMenuItem.setOnAction(event -> {
-				AlbumData albumData = releasesTv.getSelectionModel().getSelectedItem();
-				viewModel.removeArtistFromLibrary(albumData);
-			});
-			contextMenu.getItems().add(removeMenuItem);
-			row.contextMenuProperty()
-			.bind(Bindings.when(Bindings.isNotNull(row.itemProperty())).then(contextMenu).otherwise((ContextMenu) null));
+   private void setFactories() {
+      releasesTv.setRowFactory(tv -> {
+         ContextMenu contextMenu = new ContextMenu();
+         contextMenu.getItems().add(new AddToWatchlistMenuItem(releasesTv, artistWatchlistTabViewModel));
+         MenuItem removeMenuItem = new MenuItem("Remove from Library");
+         removeMenuItem.setOnAction(event -> {
+            AlbumData albumData = releasesTv.getSelectionModel().getSelectedItem();
+            viewModel.removeArtistFromLibrary(albumData);
+         });
+         contextMenu.getItems().add(removeMenuItem);
+         TableRow<AlbumData> row = new TableRow<>();
+         row.contextMenuProperty().bind(
+            Bindings.when(Bindings.isNotNull(row.itemProperty())).then(contextMenu).otherwise((ContextMenu) null));
 
-			return row;
-		});
+         return row;
+      });
 
-		artistLv.setCellFactory(new Callback<ListView<Artist>, ListCell<Artist>>() {
+      artistLv.setCellFactory(new Callback<ListView<Artist>, ListCell<Artist>>() {
 
-			@Override
-			public ListCell<Artist> call(ListView<Artist> param) {
-				ListCell<Artist> listCell = new ListCell<Artist>() {
-					@Override
-					protected void updateItem(Artist item, boolean empty) {
-						super.updateItem(item, empty);
-						if (empty) {
-							setText(null);
-						} else {
-							setText(item.name);
-						}
-					}
-				};
+         @Override
+         public ListCell<Artist> call(ListView<Artist> param) {
+            ListCell<Artist> listCell = new ListCell<Artist>() {
+               @Override
+               protected void updateItem(Artist item, boolean empty) {
+                  super.updateItem(item, empty);
+                  if (empty) {
+                     setText(null);
+                  } else {
+                     setText(item.name);
+                  }
+               }
+            };
 
-				return listCell;
-			}
-		});
+            return listCell;
+         }
+      });
 
-		artistTc.setCellValueFactory(new AlbumDataCellValueFactories.ArtistNameValueFactory());
-		albumTc.setCellValueFactory(new AlbumDataCellValueFactories.AlbumNameValueFactory());
-		releasedTc.setCellValueFactory(new AlbumDataCellValueFactories.ReleaseDateValueFactory());
+      artistTc.setCellValueFactory(new AlbumDataCellValueFactories.ArtistNameValueFactory());
+      albumTc.setCellValueFactory(new AlbumDataCellValueFactories.AlbumNameValueFactory());
+      releasedTc.setCellValueFactory(new AlbumDataCellValueFactories.ReleaseDateValueFactory());
 
-		artistTc.setCellFactory(new DoubleClickListenerCellFactory<AlbumData, String>(() -> mainViewModel.switchToArtistTab()));
-		albumTc.setCellFactory(new DoubleClickListenerCellFactory<AlbumData, String>(() -> mainViewModel.switchToAlbumTab()));
-	}
+      artistTc.setCellFactory(
+         new DoubleClickListenerCellFactory<AlbumData, String>(() -> mainViewModel.switchToArtistTab()));
+      albumTc
+         .setCellFactory(new DoubleClickListenerCellFactory<AlbumData, String>(() -> mainViewModel.switchToAlbumTab()));
+   }
 
-	private void bindProperties() {
-		viewModel.releasesProperty().bindBidirectional(releasesTv.itemsProperty());
+   private void bindProperties() {
+      viewModel.releasesProperty().bindBidirectional(releasesTv.itemsProperty());
 
-		viewModel.selectedArtistProperty().bind(artistLv.getSelectionModel().selectedItemProperty());
-		viewModel.selectedAlbumProperty().bind(releasesTv.getSelectionModel().selectedItemProperty());
+      viewModel.selectedArtistProperty().bind(artistLv.getSelectionModel().selectedItemProperty());
+      viewModel.selectedAlbumProperty().bind(releasesTv.getSelectionModel().selectedItemProperty());
 
-		viewModel.loadingProperty().bindBidirectional(loadingIndicator.visibleProperty());
-		viewModel.loadingProperty().bindBidirectional(loadingIndicatorBackground.visibleProperty());
-	}
+      viewModel.loadingProperty().bindBidirectional(loadingIndicator.visibleProperty());
+      viewModel.loadingProperty().bindBidirectional(loadingIndicatorBackground.visibleProperty());
+   }
 
-	@FXML
-	private void loadAllAlbumsInLibrary() {
-		viewModel.loadAllArtistsInLibrary();
-	}
+   @FXML
+   private void loadAllAlbumsInLibrary() {
+      viewModel.loadAllArtistsInLibrary();
+   }
 
-	@FXML
-	private void exportLibrary() {
-		viewModel.exportLibrary();
-	}
+   @FXML
+   private void exportLibrary() {
+      viewModel.exportLibrary();
+   }
 
-	@FXML
-	private void importLibrary() {
-		viewModel.importLibrary();
-	}
+   @FXML
+   private void importLibrary() {
+      viewModel.importLibrary();
+   }
 }

@@ -8,12 +8,13 @@ import javafx.scene.control.TableView;
 
 public final class AddToWatchlistMenuItem extends MenuItem {
 
-	public AddToWatchlistMenuItem(TableView<AlbumData> tableView, ArtistWatchlistTabViewModel artistWatchlistTabViewModel) {
-		setText("Add Artist to Watchlist");
+   public AddToWatchlistMenuItem(TableView<AlbumData> tableView,
+      ArtistWatchlistTabViewModel artistWatchlistTabViewModel) {
+      setText("Add Artist to Watchlist");
 
-		setOnAction((e) -> {
-			AlbumData selectedItem = tableView.getSelectionModel().getSelectedItem();
-			artistWatchlistTabViewModel.addArtistToWatchlist(selectedItem.artist);
-		});
-	}
+      setOnAction((e) -> {
+         AlbumData selectedItem = tableView.getSelectionModel().getSelectedItem();
+         artistWatchlistTabViewModel.addArtistToWatchlist(selectedItem.artist);
+      });
+   }
 }

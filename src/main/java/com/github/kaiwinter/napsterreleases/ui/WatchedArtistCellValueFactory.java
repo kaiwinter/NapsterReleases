@@ -14,58 +14,58 @@ import javafx.util.Callback;
  */
 public final class WatchedArtistCellValueFactory {
 
-	public static final class WatchedArtistValueFactory
-			implements Callback<TableColumn.CellDataFeatures<WatchedArtist, WatchedArtist>, ObservableValue<WatchedArtist>> {
-		@Override
-		public ObservableValue<WatchedArtist> call(CellDataFeatures<WatchedArtist, WatchedArtist> value) {
-			return new ObservableValueBase<WatchedArtist>() {
-				@Override
-				public WatchedArtist getValue() {
-					return value.getValue();
-				}
-			};
-		}
-	}
+   public static final class WatchedArtistValueFactory
+      implements Callback<TableColumn.CellDataFeatures<WatchedArtist, WatchedArtist>, ObservableValue<WatchedArtist>> {
+      @Override
+      public ObservableValue<WatchedArtist> call(CellDataFeatures<WatchedArtist, WatchedArtist> value) {
+         return new ObservableValueBase<WatchedArtist>() {
+            @Override
+            public WatchedArtist getValue() {
+               return value.getValue();
+            }
+         };
+      }
+   }
 
-	public static final class ArtistNameCellFactory extends TableCell<WatchedArtist, WatchedArtist> {
-		@Override
-		protected void updateItem(WatchedArtist item, boolean empty) {
-			super.updateItem(item, empty);
-			textProperty().unbind();
-			if (empty) {
-				setText(null);
-			} else {
-				setText(item.getArtist().name);
-				textFillProperty().bind(item.getLastRelease().textColorProperty());
-			}
-		}
-	}
+   public static final class ArtistNameCellFactory extends TableCell<WatchedArtist, WatchedArtist> {
+      @Override
+      protected void updateItem(WatchedArtist item, boolean empty) {
+         super.updateItem(item, empty);
+         textProperty().unbind();
+         if (empty) {
+            setText(null);
+         } else {
+            setText(item.getArtist().name);
+            textFillProperty().bind(item.getLastRelease().textColorProperty());
+         }
+      }
+   }
 
-	public static final class LastReleaseCellFactory extends TableCell<WatchedArtist, WatchedArtist> {
-		@Override
-		protected void updateItem(WatchedArtist item, boolean empty) {
-			super.updateItem(item, empty);
-			textProperty().unbind();
-			if (empty) {
-				setText(null);
-			} else {
-				textProperty().bind(item.getLastRelease().dateProperty());
-				textFillProperty().bind(item.getLastRelease().textColorProperty());
-			}
-		}
-	}
+   public static final class LastReleaseCellFactory extends TableCell<WatchedArtist, WatchedArtist> {
+      @Override
+      protected void updateItem(WatchedArtist item, boolean empty) {
+         super.updateItem(item, empty);
+         textProperty().unbind();
+         if (empty) {
+            setText(null);
+         } else {
+            textProperty().bind(item.getLastRelease().dateProperty());
+            textFillProperty().bind(item.getLastRelease().textColorProperty());
+         }
+      }
+   }
 
-	public static final class AlbumNameCellFactory extends TableCell<WatchedArtist, WatchedArtist> {
-		@Override
-		protected void updateItem(WatchedArtist item, boolean empty) {
-			super.updateItem(item, empty);
-			textProperty().unbind();
-			if (empty) {
-				setText(null);
-			} else {
-				textProperty().bind(item.getLastRelease().albumNameProperty());
-				textFillProperty().bind(item.getLastRelease().textColorProperty());
-			}
-		}
-	}
+   public static final class AlbumNameCellFactory extends TableCell<WatchedArtist, WatchedArtist> {
+      @Override
+      protected void updateItem(WatchedArtist item, boolean empty) {
+         super.updateItem(item, empty);
+         textProperty().unbind();
+         if (empty) {
+            setText(null);
+         } else {
+            textProperty().bind(item.getLastRelease().albumNameProperty());
+            textFillProperty().bind(item.getLastRelease().textColorProperty());
+         }
+      }
+   }
 }

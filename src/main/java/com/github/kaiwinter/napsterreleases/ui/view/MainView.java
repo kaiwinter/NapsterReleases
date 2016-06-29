@@ -38,142 +38,142 @@ import javafx.util.Pair;
 @Singleton
 public final class MainView implements FxmlView<MainViewModel> {
 
-	@FXML
-	private BorderPane borderPane;
+   @FXML
+   private BorderPane borderPane;
 
-	@FXML
-	private TabPane tabPane;
+   @FXML
+   private TabPane tabPane;
 
-	@FXML
-	private Tab newReleasesTabHandle;
+   @FXML
+   private Tab newReleasesTabHandle;
 
-	@FXML
-	private Tab artistTabHandle;
+   @FXML
+   private Tab artistTabHandle;
 
-	@FXML
-	private Tab albumTabHandle;
+   @FXML
+   private Tab albumTabHandle;
 
-	@FXML
-	private Tab artistWatchlistTabHandle;
+   @FXML
+   private Tab artistWatchlistTabHandle;
 
-	@FXML
-	private NewReleasesTabView newReleasesTabController;
+   @FXML
+   private NewReleasesTabView newReleasesTabController;
 
-	@FXML
-	private ArtistTabView artistTabController;
+   @FXML
+   private ArtistTabView artistTabController;
 
-	@FXML
-	private AlbumTabView albumTabController;
+   @FXML
+   private AlbumTabView albumTabController;
 
-	@FXML
-	private ArtistWatchlistTabView artistWatchlistTabController;
+   @FXML
+   private ArtistWatchlistTabView artistWatchlistTabController;
 
-	@FXML
-	private NotificationPane notificationPane;
+   @FXML
+   private NotificationPane notificationPane;
 
-	@FXML
-	private Tab libraryTabHandle;
+   @FXML
+   private Tab libraryTabHandle;
 
-	@FXML
-	private LibraryTabView libraryTabController;
+   @FXML
+   private LibraryTabView libraryTabController;
 
-	@FXML
-	private Tab chartsTabHandle;
+   @FXML
+   private Tab chartsTabHandle;
 
-	@FXML
-	private ChartsTabView chartsTabController;
+   @FXML
+   private ChartsTabView chartsTabController;
 
-	@InjectViewModel
-	private MainViewModel mainViewModel;
+   @InjectViewModel
+   private MainViewModel mainViewModel;
 
-	@Inject
-	private ArtistTabViewModel artistTabViewModel;
+   @Inject
+   private ArtistTabViewModel artistTabViewModel;
 
-	@Inject
-	private AlbumTabViewModel albumTabViewModel;
+   @Inject
+   private AlbumTabViewModel albumTabViewModel;
 
-	@Inject
-	private ChartsTabViewModel chartsTabViewModel;
+   @Inject
+   private ChartsTabViewModel chartsTabViewModel;
 
-	@Inject
-	private LibraryTabViewModel libraryTabViewModel;
+   @Inject
+   private LibraryTabViewModel libraryTabViewModel;
 
-	@Inject
-	private NewReleasesTabViewModel newReleasesTabViewModel;
+   @Inject
+   private NewReleasesTabViewModel newReleasesTabViewModel;
 
-	@FXML
-	private void initialize() throws IOException {
+   @FXML
+   private void initialize() throws IOException {
 
-		artistTabHandle.setOnSelectionChanged(event -> {
-			if (artistTabHandle.isSelected()) {
-				artistTabViewModel.showArtist();
-			}
-		});
+      artistTabHandle.setOnSelectionChanged(event -> {
+         if (artistTabHandle.isSelected()) {
+            artistTabViewModel.showArtist();
+         }
+      });
 
-		albumTabHandle.setOnSelectionChanged(event -> {
-			if (albumTabHandle.isSelected()) {
-				albumTabViewModel.showAlbum();
-			}
-		});
+      albumTabHandle.setOnSelectionChanged(event -> {
+         if (albumTabHandle.isSelected()) {
+            albumTabViewModel.showAlbum();
+         }
+      });
 
-		mainViewModel.bindSelectedAlbumProperty();
+      mainViewModel.bindSelectedAlbumProperty();
 
-		chartsTabViewModel.tabSelectedProperty().bind(chartsTabHandle.selectedProperty());
-		libraryTabViewModel.tabSelectedProperty().bind(libraryTabHandle.selectedProperty());
-		newReleasesTabViewModel.tabSelectedProperty().bind(newReleasesTabHandle.selectedProperty());
-	}
+      chartsTabViewModel.tabSelectedProperty().bind(chartsTabHandle.selectedProperty());
+      libraryTabViewModel.tabSelectedProperty().bind(libraryTabHandle.selectedProperty());
+      newReleasesTabViewModel.tabSelectedProperty().bind(newReleasesTabHandle.selectedProperty());
+   }
 
-	public void switchToArtistTab() {
-		tabPane.getSelectionModel().select(artistTabHandle);
-	}
+   public void switchToArtistTab() {
+      tabPane.getSelectionModel().select(artistTabHandle);
+   }
 
-	public void switchToAlbumTab() {
-		tabPane.getSelectionModel().select(albumTabHandle);
-	}
+   public void switchToAlbumTab() {
+      tabPane.getSelectionModel().select(albumTabHandle);
+   }
 
-	public void showAutoHidingNotification(NotificationPaneIcon icon, String text) {
-		ImageView image = new ImageView(icon.getIconPath());
-		notificationPane.setGraphic(image);
-		notificationPane.setText(text);
-		notificationPane.show();
+   public void showAutoHidingNotification(NotificationPaneIcon icon, String text) {
+      ImageView image = new ImageView(icon.getIconPath());
+      notificationPane.setGraphic(image);
+      notificationPane.setText(text);
+      notificationPane.show();
 
-		// Automatically hide
-		new Thread(new Task<Void>() {
-			@Override
-			protected Void call() throws Exception {
-				try {
-					Thread.sleep(3000);
-				} catch (InterruptedException e) {
-				}
-				notificationPane.hide();
-				return null;
-			}
-		}).start();
-	}
+      // Automatically hide
+      new Thread(new Task<Void>() {
+         @Override
+         protected Void call() throws Exception {
+            try {
+               Thread.sleep(3000);
+            } catch (InterruptedException e) {
+            }
+            notificationPane.hide();
+            return null;
+         }
+      }).start();
+   }
 
-	public Optional<Pair<String, String>> askUserForCredentials() {
-		LoginDialog loginDialog = new LoginDialog(null, null);
-		loginDialog.initOwner(notificationPane.getScene().getWindow());
-		loginDialog.setTitle("Login");
-		loginDialog.setHeaderText("Please enter your Rhapsody or Napster login data");
-		Optional<Pair<String, String>> userCredentials = loginDialog.showAndWait();
-		return userCredentials;
-	}
+   public Optional<Pair<String, String>> askUserForCredentials() {
+      LoginDialog loginDialog = new LoginDialog(null, null);
+      loginDialog.initOwner(notificationPane.getScene().getWindow());
+      loginDialog.setTitle("Login");
+      loginDialog.setHeaderText("Please enter your Rhapsody or Napster login data");
+      Optional<Pair<String, String>> userCredentials = loginDialog.showAndWait();
+      return userCredentials;
+   }
 
-	public boolean askUserToRetry(int status, String reason) {
-		ButtonType retry = new ButtonType("Retry", ButtonData.OK_DONE);
-		ButtonType[] buttons = { retry, ButtonType.CANCEL };
-		Alert dlg = new Alert(AlertType.ERROR, "Login failed. Wrong username/password?", buttons);
-		dlg.initModality(Modality.APPLICATION_MODAL);
-		dlg.initOwner(notificationPane.getScene().getWindow());
+   public boolean askUserToRetry(int status, String reason) {
+      ButtonType retry = new ButtonType("Retry", ButtonData.OK_DONE);
+      ButtonType[] buttons = { retry, ButtonType.CANCEL };
+      Alert dlg = new Alert(AlertType.ERROR, "Login failed. Wrong username/password?", buttons);
+      dlg.initModality(Modality.APPLICATION_MODAL);
+      dlg.initOwner(notificationPane.getScene().getWindow());
 
-		dlg.setHeaderText(status + " " + reason);
-		Optional<ButtonType> selection = dlg.showAndWait();
-		if (selection.isPresent()) {
-			if (selection.get().getButtonData() == ButtonData.OK_DONE) {
-				return true;
-			}
-		} // else: user canceled
-		return false;
-	}
+      dlg.setHeaderText(status + " " + reason);
+      Optional<ButtonType> selection = dlg.showAndWait();
+      if (selection.isPresent()) {
+         if (selection.get().getButtonData() == ButtonData.OK_DONE) {
+            return true;
+         }
+      } // else: user canceled
+      return false;
+   }
 }

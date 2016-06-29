@@ -27,113 +27,117 @@ import retrofit.RetrofitError;
 @Singleton
 public class SharedViewModel {
 
-	private final RhapsodySdkWrapper rhapsodySdkWrapper;
+   private final RhapsodySdkWrapper rhapsodySdkWrapper;
 
-	@Inject
-	private MainView mainView;
+   @Inject
+   private MainView mainView;
 
-	@Inject
-	private MainViewModel mainViewModel;
+   @Inject
+   private MainViewModel mainViewModel;
 
-	public SharedViewModel() throws IOException {
-		RhapsodyApiKeyProperties rhapsodyApiKeyConfig = new RhapsodyApiKeyProperties();
-		rhapsodySdkWrapper = new RhapsodySdkWrapper(rhapsodyApiKeyConfig.apiKey, rhapsodyApiKeyConfig.apiSecret,
-				new PreferencesAuthorizationStore());
-		//rhapsodySdkWrapper.setVerboseLoggingEnabled(true);
-	}
+   public SharedViewModel() throws IOException {
+      RhapsodyApiKeyProperties rhapsodyApiKeyConfig = new RhapsodyApiKeyProperties();
+      rhapsodySdkWrapper = new RhapsodySdkWrapper(rhapsodyApiKeyConfig.apiKey, rhapsodyApiKeyConfig.apiSecret,
+         new PreferencesAuthorizationStore());
+      // rhapsodySdkWrapper.setVerboseLoggingEnabled(true);
+   }
 
-	/**
-	 * Tries to handle the passed <code>error</code> and calls the <code>actionRetryCallback</code> afterwards. If the method don't know how
-	 * to handle the error an {@link ExceptionDialog} is shown to the user.
-	 *
-	 * In case of an 401 error (unauthorized) a token refresh is triggered followed by a username/password login if the former fails. If the
-	 * authorization was successful the <code>actionretryCallback</code> is called.
-	 *
-	 * @param error
-	 *            the error to handle
-	 * @param actionRetryCallback
-	 *            the callback to execute if the error could be solved
-	 */
-	public void handleError(RetrofitError error, ActionRetryCallback actionRetryCallback) {
+   /**
+    * <p>
+    * Tries to handle the passed <code>error</code> and calls the <code>actionRetryCallback</code> afterwards. If the
+    * method don't know how to handle the error an {@link ExceptionDialog} is shown to the user.
+    * </p>
+    * <p>
+    * In case of an 401 error (unauthorized) a token refresh is triggered followed by a username/password login if the
+    * former fails. If the authorization was successful the <code>actionretryCallback</code> is called.
+    * </p>
+    * 
+    * @param error
+    *           the error to handle
+    * @param actionRetryCallback
+    *           the callback to execute if the error could be solved
+    */
+   public void handleError(RetrofitError error, ActionRetryCallback actionRetryCallback) {
 
-		if (error.getResponse() != null && error.getResponse().getStatus() == 401) {
-			tryReAuthorization(actionRetryCallback);
-		} else {
-			Platform.runLater(() -> {
-				ExceptionDialog exceptionDialog = new ExceptionDialog(error);
-				exceptionDialog.show();
-			});
-		}
-	}
+      if (error.getResponse() != null && error.getResponse().getStatus() == 401) {
+         tryReAuthorization(actionRetryCallback);
+      } else {
+         Platform.runLater(() -> {
+            ExceptionDialog exceptionDialog = new ExceptionDialog(error);
+            exceptionDialog.show();
+         });
+      }
+   }
 
-	/**
-	 * Tries to re-authenticate by using the refresh_token to get a new access_token. If this fails (or no refresh_token is available) the
-	 * user gets asked for his credentials.
-	 *
-	 * @param actionCallback
-	 *            action to execute if re-authentication succeeds
-	 */
-	private void tryReAuthorization(ActionRetryCallback actionCallback) {
-		rhapsodySdkWrapper.refreshToken(new AuthenticationCallback() {
-			@Override
-			public void success() {
-				actionCallback.retryAction();
-			}
+   /**
+    * Tries to re-authenticate by using the refresh_token to get a new access_token. If this fails (or no refresh_token
+    * is available) the user gets asked for his credentials.
+    *
+    * @param actionCallback
+    *           action to execute if re-authentication succeeds
+    */
+   private void tryReAuthorization(ActionRetryCallback actionCallback) {
+      rhapsodySdkWrapper.refreshToken(new AuthenticationCallback() {
+         @Override
+         public void success() {
+            actionCallback.retryAction();
+         }
 
-			@Override
-			public void failure(int status, String reason) {
-				showAutoHidingNotification(NotificationPaneIcon.WARNING, "Authentication failed (" + status + ") - " + reason);
+         @Override
+         public void failure(int status, String reason) {
+            showAutoHidingNotification(NotificationPaneIcon.WARNING,
+               "Authentication failed (" + status + ") - " + reason);
 
-				Platform.runLater(() -> {
-					authorize(actionCallback);
-				});
-			}
-		});
-	}
+            Platform.runLater(() -> {
+               authorize(actionCallback);
+            });
+         }
+      });
+   }
 
-	private void authorize(ActionRetryCallback actionCallback) {
-		Optional<Pair<String, String>> userCredentials = mainView.askUserForCredentials();
-		if (!userCredentials.isPresent()) {
-			return;
-		}
+   private void authorize(ActionRetryCallback actionCallback) {
+      Optional<Pair<String, String>> userCredentials = mainView.askUserForCredentials();
+      if (!userCredentials.isPresent()) {
+         return;
+      }
 
-		Pair<String, String> pair = userCredentials.get();
-		rhapsodySdkWrapper.authorize(pair.getKey(), pair.getValue(), new AuthenticationCallback() {
+      Pair<String, String> pair = userCredentials.get();
+      rhapsodySdkWrapper.authorize(pair.getKey(), pair.getValue(), new AuthenticationCallback() {
 
-			@Override
-			public void success() {
-				showAutoHidingNotification(NotificationPaneIcon.INFO, "Authentication successful");
+         @Override
+         public void success() {
+            showAutoHidingNotification(NotificationPaneIcon.INFO, "Authentication successful");
 
-				Platform.runLater(() -> {
-					actionCallback.retryAction();
-				});
-			}
+            Platform.runLater(() -> {
+               actionCallback.retryAction();
+            });
+         }
 
-			@Override
-			public void failure(int status, String reason) {
-				Platform.runLater(() -> {
-					boolean retry = mainView.askUserToRetry(status, reason);
-					if (retry) {
-						authorize(actionCallback);
-					}
-				});
-			}
-		});
-	}
+         @Override
+         public void failure(int status, String reason) {
+            Platform.runLater(() -> {
+               boolean retry = mainView.askUserToRetry(status, reason);
+               if (retry) {
+                  authorize(actionCallback);
+               }
+            });
+         }
+      });
+   }
 
-	public void logout() {
-		rhapsodySdkWrapper.clearAuthorization();
-	}
+   public void logout() {
+      rhapsodySdkWrapper.clearAuthorization();
+   }
 
-	public RhapsodySdkWrapper getRhapsodySdkWrapper() {
-		return rhapsodySdkWrapper;
-	}
+   public RhapsodySdkWrapper getRhapsodySdkWrapper() {
+      return rhapsodySdkWrapper;
+   }
 
-	public void showAutoHidingNotification(NotificationPaneIcon icon, String message) {
-		Platform.runLater(() -> mainView.showAutoHidingNotification(icon, message));
-	}
+   public void showAutoHidingNotification(NotificationPaneIcon icon, String message) {
+      Platform.runLater(() -> mainView.showAutoHidingNotification(icon, message));
+   }
 
-	public Window getPrimaryStage() {
-		return mainViewModel.getPrimarySage();
-	}
+   public Window getPrimaryStage() {
+      return mainViewModel.getPrimarySage();
+   }
 }

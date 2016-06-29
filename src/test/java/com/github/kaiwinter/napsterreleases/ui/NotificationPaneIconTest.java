@@ -9,19 +9,21 @@ import com.github.kaiwinter.napsterreleases.ui.NotificationPaneIcon;
  */
 public final class NotificationPaneIconTest {
 
-	/**
-	 * Cause the initialization of the enum value to load the resource. In case the file does not exist an Exception will be thrown.
-	 */
-	@Test
-	public void testInfo() {
-		NotificationPaneIcon.INFO.getIconPath();
-	}
+   /**
+    * Cause the initialization of the enum value to load the resource. In case the file does not exist an Exception will
+    * be thrown.
+    */
+   @Test
+   public void testInfo() {
+      NotificationPaneIcon.INFO.getIconPath();
+   }
 
-	/**
-	 * Cause the initialization of the enum value to load the resource. In case the file does not exist an Exception will be thrown.
-	 */
-	@Test
-	public void testWarning() {
-		NotificationPaneIcon.WARNING.getIconPath();
-	}
+   /**
+    * Cause the initialization of the enum value to load the resource. In case the file does not exist an Exception will
+    * be thrown.
+    */
+   @Test
+   public void testWarning() {
+      NotificationPaneIcon.WARNING.getIconPath();
+   }
 }

@@ -21,29 +21,29 @@ import javafx.stage.Stage;
  * Main class which starts the JavaFX application.
  */
 public final class NapsterReleasesMain extends MvvmfxGuiceApplication {
-	private static final Logger LOGGER = LoggerFactory.getLogger(NapsterReleasesMain.class.getSimpleName());
+   private static final Logger LOGGER = LoggerFactory.getLogger(NapsterReleasesMain.class.getSimpleName());
 
-	public static void main(String... args) throws IOException {
-		launch(args);
-	}
+   public static void main(String... args) throws IOException {
+      launch(args);
+   }
 
-	@Override
-	public void startMvvmfx(Stage primaryStage) throws IOException {
+   @Override
+   public void startMvvmfx(Stage primaryStage) throws IOException {
 
-		ViewTuple<MainView, MainViewModel> viewTuple = FluentViewLoader.fxmlView(MainView.class).load();
-		Parent root = viewTuple.getView();
+      ViewTuple<MainView, MainViewModel> viewTuple = FluentViewLoader.fxmlView(MainView.class).load();
+      Parent root = viewTuple.getView();
 
-		viewTuple.getViewModel().setPrimaryStage(primaryStage);
+      viewTuple.getViewModel().setPrimaryStage(primaryStage);
 
-		Scene scene = new Scene(root);
-		primaryStage.setScene(scene);
-		primaryStage.setTitle("Napster New Releases");
-		primaryStage.show();
+      Scene scene = new Scene(root);
+      primaryStage.setScene(scene);
+      primaryStage.setTitle("Napster New Releases");
+      primaryStage.show();
 
-		Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> Platform.runLater(() -> {
-			LOGGER.error(throwable.getMessage(), throwable);
-			ExceptionDialog exceptionDialog = new ExceptionDialog(throwable);
-			exceptionDialog.show();
-		}));
-	}
+      Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> Platform.runLater(() -> {
+         LOGGER.error(throwable.getMessage(), throwable);
+         ExceptionDialog exceptionDialog = new ExceptionDialog(throwable);
+         exceptionDialog.show();
+      }));
+   }
 }

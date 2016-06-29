@@ -14,69 +14,69 @@ import javafx.util.Callback;
  */
 public final class AlbumDataCellValueFactories {
 
-	public static final class AlbumNameValueFactory
-			implements Callback<TableColumn.CellDataFeatures<AlbumData, String>, ObservableValue<String>> {
-		@Override
-		public ObservableValue<String> call(CellDataFeatures<AlbumData, String> value) {
-			return new ObservableValueBase<String>() {
-				@Override
-				public String getValue() {
-					return value.getValue().name;
-				}
-			};
-		}
-	}
+   public static final class AlbumNameValueFactory
+      implements Callback<TableColumn.CellDataFeatures<AlbumData, String>, ObservableValue<String>> {
+      @Override
+      public ObservableValue<String> call(CellDataFeatures<AlbumData, String> value) {
+         return new ObservableValueBase<String>() {
+            @Override
+            public String getValue() {
+               return value.getValue().name;
+            }
+         };
+      }
+   }
 
-	public static final class ArtistNameValueFactory
-			implements Callback<TableColumn.CellDataFeatures<AlbumData, String>, ObservableValue<String>> {
-		@Override
-		public ObservableValue<String> call(CellDataFeatures<AlbumData, String> value) {
-			return new ObservableValueBase<String>() {
-				@Override
-				public String getValue() {
-					return value.getValue().artist.name;
-				}
-			};
-		}
-	}
+   public static final class ArtistNameValueFactory
+      implements Callback<TableColumn.CellDataFeatures<AlbumData, String>, ObservableValue<String>> {
+      @Override
+      public ObservableValue<String> call(CellDataFeatures<AlbumData, String> value) {
+         return new ObservableValueBase<String>() {
+            @Override
+            public String getValue() {
+               return value.getValue().artist.name;
+            }
+         };
+      }
+   }
 
-	public static final class DiscCountValueFactory
-			implements Callback<TableColumn.CellDataFeatures<AlbumData, String>, ObservableValue<String>> {
-		@Override
-		public ObservableValue<String> call(CellDataFeatures<AlbumData, String> value) {
-			return new ObservableValueBase<String>() {
-				@Override
-				public String getValue() {
-					return String.valueOf(value.getValue().discCount);
-				}
-			};
-		}
-	}
+   public static final class DiscCountValueFactory
+      implements Callback<TableColumn.CellDataFeatures<AlbumData, String>, ObservableValue<String>> {
+      @Override
+      public ObservableValue<String> call(CellDataFeatures<AlbumData, String> value) {
+         return new ObservableValueBase<String>() {
+            @Override
+            public String getValue() {
+               return String.valueOf(value.getValue().discCount);
+            }
+         };
+      }
+   }
 
-	public static final class ReleaseDateValueFactory
-			implements Callback<TableColumn.CellDataFeatures<AlbumData, String>, ObservableValue<String>> {
-		@Override
-		public ObservableValue<String> call(CellDataFeatures<AlbumData, String> value) {
-			return new ObservableValueBase<String>() {
-				@Override
-				public String getValue() {
-					return TimeUtil.timestampToString(value.getValue().released);
-				}
-			};
-		}
-	}
+   public static final class ReleaseDateValueFactory
+      implements Callback<TableColumn.CellDataFeatures<AlbumData, String>, ObservableValue<String>> {
+      @Override
+      public ObservableValue<String> call(CellDataFeatures<AlbumData, String> value) {
+         return new ObservableValueBase<String>() {
+            @Override
+            public String getValue() {
+               return TimeUtil.timestampToString(value.getValue().released);
+            }
+         };
+      }
+   }
 
-	public static final class TypeValueFactory
-			implements Callback<TableColumn.CellDataFeatures<AlbumData, String>, ObservableValue<String>> {
-		@Override
-		public ObservableValue<String> call(CellDataFeatures<AlbumData, String> value) {
-			return new ObservableValueBase<String>() {
-				@Override
-				public String getValue() {
-					return value.getValue().type.name;
-				}
-			};
-		}
-	}
+   public static final class TypeValueFactory
+      implements Callback<TableColumn.CellDataFeatures<AlbumData, String>, ObservableValue<String>> {
+      @Override
+      public ObservableValue<String> call(CellDataFeatures<AlbumData, String> value) {
+         return new ObservableValueBase<String>() {
+            @Override
+            public String getValue() {
+               return value.getValue().type.name;
+            }
+         };
+      }
+   }
 
 }

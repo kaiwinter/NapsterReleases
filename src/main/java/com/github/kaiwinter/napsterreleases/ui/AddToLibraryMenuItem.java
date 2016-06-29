@@ -8,12 +8,12 @@ import javafx.scene.control.TableView;
 
 public final class AddToLibraryMenuItem extends MenuItem {
 
-	public AddToLibraryMenuItem(TableView<AlbumData> tableView, LibraryTabViewModel LibraryTabViewModel) {
-		setText("Add Album To Library");
+   public AddToLibraryMenuItem(TableView<AlbumData> tableView, LibraryTabViewModel libraryTabViewModel) {
+      setText("Add Album To Library");
 
-		setOnAction(event -> {
-			AlbumData albumData = tableView.getSelectionModel().getSelectedItem();
-			LibraryTabViewModel.addAlbumToLibrary(albumData);
-		});
-	}
+      setOnAction(event -> {
+         AlbumData albumData = tableView.getSelectionModel().getSelectedItem();
+         libraryTabViewModel.addAlbumToLibrary(albumData);
+      });
+   }
 }

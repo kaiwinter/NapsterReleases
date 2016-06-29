@@ -15,33 +15,33 @@ import javafx.scene.layout.Region;
  */
 public final class ChartsTabView implements FxmlView<ChartsTabViewModel> {
 
-	@FXML
-	private TextArea artistsTa;
+   @FXML
+   private TextArea artistsTa;
 
-	@FXML
-	private TextArea albumsTa;
+   @FXML
+   private TextArea albumsTa;
 
-	@FXML
-	private ProgressIndicator loadingIndicator;
-	@FXML
-	private Region loadingIndicatorBackground;
+   @FXML
+   private ProgressIndicator loadingIndicator;
+   @FXML
+   private Region loadingIndicatorBackground;
 
-	@InjectViewModel
-	private ChartsTabViewModel viewModel;
+   @InjectViewModel
+   private ChartsTabViewModel viewModel;
 
-	@FXML
-	public void initialize() {
-		viewModel.loadingProperty().bindBidirectional(loadingIndicator.visibleProperty());
-		viewModel.loadingProperty().bindBidirectional(loadingIndicatorBackground.visibleProperty());
+   @FXML
+   public void initialize() {
+      viewModel.loadingProperty().bindBidirectional(loadingIndicator.visibleProperty());
+      viewModel.loadingProperty().bindBidirectional(loadingIndicatorBackground.visibleProperty());
 
-		viewModel.artistsTextProperty().bindBidirectional(artistsTa.textProperty());
-		viewModel.albumTextProperty().bindBidirectional(albumsTa.textProperty());
+      viewModel.artistsTextProperty().bindBidirectional(artistsTa.textProperty());
+      viewModel.albumTextProperty().bindBidirectional(albumsTa.textProperty());
 
-		viewModel.tabSelectedProperty().addListener((ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
-			// Automatically load if tab is selected and no data was loaded previously
-			if (newValue && artistsTa.getText().isEmpty()) {
-				viewModel.loadCharts();
-			}
-		});
-	}
+      viewModel.tabSelectedProperty().addListener((ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
+         // Automatically load if tab is selected and no data was loaded previously
+         if (newValue && artistsTa.getText().isEmpty()) {
+            viewModel.loadCharts();
+         }
+      });
+   }
 }

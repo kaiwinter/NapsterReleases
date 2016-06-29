@@ -16,35 +16,35 @@ import javafx.scene.layout.Region;
  */
 public final class ArtistTabView implements FxmlView<ArtistTabViewModel> {
 
-	@FXML
-	private TextField artistNameTf;
+   @FXML
+   private TextField artistNameTf;
 
-	@FXML
-	private TextArea artistBioTa;
+   @FXML
+   private TextArea artistBioTa;
 
-	@FXML
-	private TextArea artistBlurbsTa;
+   @FXML
+   private TextArea artistBlurbsTa;
 
-	@FXML
-	private ImageView artistImageIv;
+   @FXML
+   private ImageView artistImageIv;
 
-	@FXML
-	private ProgressIndicator loadingIndicator;
+   @FXML
+   private ProgressIndicator loadingIndicator;
 
-	@FXML
-	private Region loadingIndicatorBackground;
+   @FXML
+   private Region loadingIndicatorBackground;
 
-	@InjectViewModel
-	private ArtistTabViewModel viewModel;
+   @InjectViewModel
+   private ArtistTabViewModel viewModel;
 
-	@FXML
-	public void initialize() {
-		viewModel.nameProperty().bindBidirectional(artistNameTf.textProperty());
-		viewModel.bioProperty().bindBidirectional(artistBioTa.textProperty());
-		viewModel.blubsProperty().bindBidirectional(artistBlurbsTa.textProperty());
-		viewModel.imageProperty().bindBidirectional(artistImageIv.imageProperty());
+   @FXML
+   public void initialize() {
+      viewModel.nameProperty().bindBidirectional(artistNameTf.textProperty());
+      viewModel.bioProperty().bindBidirectional(artistBioTa.textProperty());
+      viewModel.blubsProperty().bindBidirectional(artistBlurbsTa.textProperty());
+      viewModel.imageProperty().bindBidirectional(artistImageIv.imageProperty());
 
-		viewModel.loadingProperty().bindBidirectional(loadingIndicator.visibleProperty());
-		viewModel.loadingProperty().bindBidirectional(loadingIndicatorBackground.visibleProperty());
-	}
+      viewModel.loadingProperty().bindBidirectional(loadingIndicator.visibleProperty());
+      viewModel.loadingProperty().bindBidirectional(loadingIndicatorBackground.visibleProperty());
+   }
 }

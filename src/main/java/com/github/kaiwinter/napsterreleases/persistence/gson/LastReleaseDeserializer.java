@@ -16,20 +16,20 @@ import javafx.beans.property.SimpleObjectProperty;
  * {@link JsonDeserializer} for {@link LastRelease}.
  */
 public final class LastReleaseDeserializer implements JsonDeserializer<ObjectProperty<LastRelease>> {
-	@Override
-	public ObjectProperty<LastRelease> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-			throws JsonParseException {
-		JsonObject jsonObject = json.getAsJsonObject();
-		JsonElement albumId = jsonObject.get(LastReleaseSerializer.ALBUM_ID);
-		JsonElement lastReleaseDate = jsonObject.get(LastReleaseSerializer.LAST_RELEASE_DATE_PROPERTY);
-		JsonElement albumName = jsonObject.get(LastReleaseSerializer.ALBUM_NAME_PROPERTY);
+   @Override
+   public ObjectProperty<LastRelease> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+      throws JsonParseException {
+      JsonObject jsonObject = json.getAsJsonObject();
+      JsonElement albumId = jsonObject.get(LastReleaseSerializer.ALBUM_ID);
+      JsonElement lastReleaseDate = jsonObject.get(LastReleaseSerializer.LAST_RELEASE_DATE_PROPERTY);
+      JsonElement albumName = jsonObject.get(LastReleaseSerializer.ALBUM_NAME_PROPERTY);
 
-		LastRelease lastRelease = new LastRelease();
-		if (albumId != null && lastReleaseDate != null && albumName != null) {
-			lastRelease.setId(albumId.getAsString());
-			lastRelease.setDate(lastReleaseDate.getAsString());
-			lastRelease.setAlbumName(albumName.getAsString());
-		}
-		return new SimpleObjectProperty<>(lastRelease);
-	}
+      LastRelease lastRelease = new LastRelease();
+      if (albumId != null && lastReleaseDate != null && albumName != null) {
+         lastRelease.setId(albumId.getAsString());
+         lastRelease.setDate(lastReleaseDate.getAsString());
+         lastRelease.setAlbumName(albumName.getAsString());
+      }
+      return new SimpleObjectProperty<>(lastRelease);
+   }
 }

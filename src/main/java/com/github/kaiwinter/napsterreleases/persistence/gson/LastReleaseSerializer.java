@@ -14,16 +14,16 @@ import javafx.beans.property.ObjectProperty;
  * {@link JsonSerializer} for {@link LastRelease}.
  */
 public final class LastReleaseSerializer implements JsonSerializer<ObjectProperty<LastRelease>> {
-	public static final String ALBUM_ID = "albumId";
-	public static final String LAST_RELEASE_DATE_PROPERTY = "lastReleaseDate";
-	public static final String ALBUM_NAME_PROPERTY = "albumName";
+   public static final String ALBUM_ID = "albumId";
+   public static final String LAST_RELEASE_DATE_PROPERTY = "lastReleaseDate";
+   public static final String ALBUM_NAME_PROPERTY = "albumName";
 
-	@Override
-	public JsonElement serialize(ObjectProperty<LastRelease> src, Type typeOfSrc, JsonSerializationContext context) {
-		JsonObject jsonObject = new JsonObject();
-		jsonObject.addProperty(ALBUM_ID, src.getValue().getId());
-		jsonObject.addProperty(LAST_RELEASE_DATE_PROPERTY, src.getValue().getDate());
-		jsonObject.addProperty(ALBUM_NAME_PROPERTY, src.getValue().getAlbumName());
-		return jsonObject;
-	}
+   @Override
+   public JsonElement serialize(ObjectProperty<LastRelease> src, Type typeOfSrc, JsonSerializationContext context) {
+      JsonObject jsonObject = new JsonObject();
+      jsonObject.addProperty(ALBUM_ID, src.getValue().getId());
+      jsonObject.addProperty(LAST_RELEASE_DATE_PROPERTY, src.getValue().getDate());
+      jsonObject.addProperty(ALBUM_NAME_PROPERTY, src.getValue().getAlbumName());
+      return jsonObject;
+   }
 }
