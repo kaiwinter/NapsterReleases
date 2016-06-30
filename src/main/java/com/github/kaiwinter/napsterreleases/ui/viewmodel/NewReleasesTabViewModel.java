@@ -26,9 +26,9 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 @Singleton
 public final class NewReleasesTabViewModel implements ViewModel {
@@ -122,17 +122,22 @@ public final class NewReleasesTabViewModel implements ViewModel {
       sharedViewModel.getRhapsodySdkWrapper().loadGenres(new Callback<Collection<GenreData>>() {
 
          @Override
-         public void success(Collection<GenreData> genres, Response response) {
-            LOGGER.info("Loaded {} genres", genres.size());
-            setGenres(genres);
-            loadingProperty().set(false);
+         public void onResponse(Call<Collection<GenreData>> call, Response<Collection<GenreData>> response) {
+            if (response.isSuccessful()) {
+               LOGGER.info("Loaded {} genres", response.body().size());
+               setGenres(response.body());
+               loadingProperty().set(false);
+            } else {
+               loadingProperty().set(false);
+               LOGGER.error("Error loading genres ({})", response.message());
+               sharedViewModel.handleError(new Throwable(response.message()), response.code(), () -> loadGenres());
+            }
          }
 
          @Override
-         public void failure(RetrofitError error) {
-            loadingProperty().set(false);
-            LOGGER.error("Error loading genres ({})", error.getMessage());
-            sharedViewModel.handleError(error, () -> loadGenres());
+         public void onFailure(Call<Collection<GenreData>> call, Throwable throwable) {
+            LOGGER.error("Error loading genres ({})", throwable.getMessage());
+            sharedViewModel.handleError(throwable, -1, () -> loadGenres());
          }
       });
    }
@@ -169,29 +174,37 @@ public final class NewReleasesTabViewModel implements ViewModel {
    public void showNewReleases(GenreData genreData) {
       loadingProperty().set(true);
       Callback<Collection<AlbumData>> callback = new Callback<Collection<AlbumData>>() {
+
          @Override
-         public void success(Collection<AlbumData> albums, Response response) {
-            LOGGER.info("Loaded {} albums", albums.size());
-            // Check if genre selection changed in the meantime
-            GenreData currentGenre = selectedGenreProperty().get().getValue();
-            if (currentGenre != null && currentGenre == genreData) {
-               @SuppressWarnings("unchecked")
-               ObservableList<AlbumData> items = (ObservableList<AlbumData>) FilterSupport
-                  .getUnwrappedList(releasesProperty().get());
-               Platform.runLater(() -> {
-                  items.setAll(albums);
-               });
-               loadingProperty().set(false);
+         public void onResponse(Call<Collection<AlbumData>> call, Response<Collection<AlbumData>> response) {
+            if (response.isSuccessful()) {
+               LOGGER.info("Loaded {} albums", response.body().size());
+               // Check if genre selection changed in the meantime
+               GenreData currentGenre = selectedGenreProperty().get().getValue();
+               if (currentGenre != null && currentGenre == genreData) {
+                  @SuppressWarnings("unchecked")
+                  ObservableList<AlbumData> items = (ObservableList<AlbumData>) FilterSupport
+                     .getUnwrappedList(releasesProperty().get());
+                  Platform.runLater(() -> {
+                     items.setAll(response.body());
+                  });
+                  loadingProperty().set(false);
+               } else {
+                  LOGGER.info("Genre selection changed, not showing loaded data");
+               }
             } else {
-               LOGGER.info("Genre selection changed, not showing loaded data");
+               loadingProperty().set(false);
+               LOGGER.error("Error loading albums ({})", response.message());
+               sharedViewModel.handleError(new Throwable(response.message()), response.code(),
+                  () -> showNewReleases(genreData));
             }
          }
 
          @Override
-         public void failure(RetrofitError error) {
+         public void onFailure(Call<Collection<AlbumData>> call, Throwable throwable) {
             loadingProperty().set(false);
-            LOGGER.error("Error loading albums ({})", error.getMessage());
-            sharedViewModel.handleError(error, () -> showNewReleases(genreData));
+            LOGGER.error("Error loading albums ({})", throwable.getMessage());
+            sharedViewModel.handleError(throwable, -1, () -> showNewReleases(genreData));
          }
       };
 
@@ -209,15 +222,20 @@ public final class NewReleasesTabViewModel implements ViewModel {
          Callback<AccountData> loadUserAccountCallback = new Callback<AccountData>() {
 
             @Override
-            public void success(AccountData userAccountData, Response response) {
-               NewReleasesTabViewModel.this.userAccountData = userAccountData;
-               sharedViewModel.getRhapsodySdkWrapper().loadAlbumNewReleases(userAccountData.id, callback);
+            public void onResponse(Call<AccountData> call, Response<AccountData> response) {
+               if (response.isSuccessful()) {
+                  NewReleasesTabViewModel.this.userAccountData = userAccountData;
+                  sharedViewModel.getRhapsodySdkWrapper().loadAlbumNewReleases(userAccountData.id, callback);
+               } else {
+                  LOGGER.error("Error loading account information ({})", response.message());
+                  callback.onFailure(null, new Throwable(response.message()));
+               }
             }
 
             @Override
-            public void failure(RetrofitError error) {
-               LOGGER.error("Error loading account information ({})", error.getMessage());
-               callback.failure(error);
+            public void onFailure(Call<AccountData> call, Throwable throwable) {
+               LOGGER.error("Error loading account information ({})", throwable.getMessage());
+               callback.onFailure(null, throwable);
             }
          };
          sharedViewModel.getRhapsodySdkWrapper().loadAccount(loadUserAccountCallback);

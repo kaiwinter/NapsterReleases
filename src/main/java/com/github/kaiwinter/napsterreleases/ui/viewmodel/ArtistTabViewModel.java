@@ -22,9 +22,9 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.image.Image;
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 @Singleton
 public final class ArtistTabViewModel implements ViewModel {
@@ -90,34 +90,48 @@ public final class ArtistTabViewModel implements ViewModel {
       imageProperty().set(image);
 
       sharedViewModel.getRhapsodySdkWrapper().loadArtistMeta(artistId, new Callback<ArtistData>() {
+
          @Override
-         public void success(ArtistData artistData, Response response) {
-            LOGGER.info("Loaded artist '{}'", artistData.name);
-            nameProperty().set(artistData.name);
+         public void onResponse(Call<ArtistData> call, Response<ArtistData> response) {
+            if (response.isSuccessful()) {
+               LOGGER.info("Loaded artist '{}'", response.body().name);
+               nameProperty().set(response.body().name);
+            } else {
+               LOGGER.error("Error loading artist ({})", response.message());
+               sharedViewModel.handleError(new Throwable(response.message()), response.code(), () -> showArtist());
+            }
          }
 
          @Override
-         public void failure(RetrofitError error) {
-            LOGGER.error("Error loading artist ({})", error.getMessage());
-            sharedViewModel.handleError(error, () -> showArtist());
+         public void onFailure(Call<ArtistData> call, Throwable throwable) {
+            LOGGER.error("Error loading artist ({})", throwable.getMessage());
+            sharedViewModel.handleError(new Throwable(throwable.getMessage()), -1, () -> showArtist());
          }
       });
 
       sharedViewModel.getRhapsodySdkWrapper().loadArtistBio(artistId, new Callback<BioData>() {
+
          @Override
-         public void success(BioData bio, Response response) {
-            LOGGER.info("Loaded bio, empty: {}, blurbs #: {}", bio.bio.isEmpty(), bio.blurbs.size());
-            String blurbs = bio.blurbs.stream().collect(Collectors.joining(",\n"));
-            bioProperty().set(bio.bio);
-            blubsProperty().set(blurbs);
-            loadingProperty().set(false);
+         public void onResponse(Call<BioData> call, Response<BioData> response) {
+            if (response.isSuccessful()) {
+               LOGGER.info("Loaded bio, empty: {}, blurbs #: {}", response.body().bio.isEmpty(),
+                  response.body().blurbs.size());
+               String blurbs = response.body().blurbs.stream().collect(Collectors.joining(",\n"));
+               bioProperty().set(response.body().bio);
+               blubsProperty().set(blurbs);
+               loadingProperty().set(false);
+            } else {
+               loadingProperty().set(false);
+               LOGGER.error("Error loading bio ({})", response.message());
+               sharedViewModel.handleError(new Throwable(response.message()), response.code(), () -> showArtist());
+            }
          }
 
          @Override
-         public void failure(RetrofitError error) {
+         public void onFailure(Call<BioData> call, Throwable throwable) {
             loadingProperty().set(false);
-            LOGGER.error("Error loading bio ({})", error.getMessage());
-            sharedViewModel.handleError(error, () -> showArtist());
+            LOGGER.error("Error loading bio ({})", throwable.getMessage());
+            sharedViewModel.handleError(throwable, -1, () -> showArtist());
          }
       });
    }

@@ -28,7 +28,8 @@ import de.saxsys.javafx.test.JfxRunner;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
-import retrofit.Callback;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 @RunWith(JfxRunner.class)
 public final class NewReleasesTabViewModelTest {
@@ -95,7 +96,7 @@ public final class NewReleasesTabViewModelTest {
 
       @Override
       public Void answer(InvocationOnMock invocation) throws Throwable {
-         ((Callback<Collection<GenreData>>) invocation.getArguments()[0]).success(genres, null);
+         ((Callback<Collection<GenreData>>) invocation.getArguments()[0]).onResponse(null, Response.success(genres));
          return null;
       }
    }
@@ -109,7 +110,7 @@ public final class NewReleasesTabViewModelTest {
 
       @Override
       public Void answer(InvocationOnMock invocation) throws Throwable {
-         ((Callback<Collection<AlbumData>>) invocation.getArguments()[2]).success(releases, null);
+         ((Callback<Collection<AlbumData>>) invocation.getArguments()[2]).onResponse(null, Response.success(releases));
          return null;
       }
    }

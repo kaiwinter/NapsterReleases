@@ -19,9 +19,9 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 @Singleton
 public final class ChartsTabViewModel implements ViewModel {
@@ -42,56 +42,66 @@ public final class ChartsTabViewModel implements ViewModel {
    }
 
    public void loadCharts() {
-
       Callback<List<ChartsArtist>> artistsCallback = new Callback<List<ChartsArtist>>() {
 
          @Override
-         public void success(List<ChartsArtist> artists, Response response) {
-            String string = "";
-            for (ChartsArtist chartsArtist : artists) {
-               ArtistData artistMeta = sharedViewModel.getRhapsodySdkWrapper().getArtistMeta(chartsArtist.id);
-               if (!string.isEmpty()) {
-                  string += "\n";
-               }
-               string += artistMeta.name + " (" + chartsArtist.playCount + " times)";
+         public void onResponse(Call<List<ChartsArtist>> call, Response<List<ChartsArtist>> response) {
+            if (response.isSuccessful()) {
+               String string = "";
+               for (ChartsArtist chartsArtist : response.body()) {
+                  ArtistData artistMeta = sharedViewModel.getRhapsodySdkWrapper().getArtistMeta(chartsArtist.id);
+                  if (!string.isEmpty()) {
+                     string += "\n";
+                  }
+                  string += artistMeta.name + " (" + chartsArtist.playCount + " times)";
 
-               artistsTextProperty().set(string);
+                  artistsTextProperty().set(string);
+               }
+            } else {
+               LOGGER.error("Error loading listening charts ({} {})", response.code(), response.message());
             }
          }
 
          @Override
-         public void failure(RetrofitError error) {
-            LOGGER.error(error.getMessage(), error);
+         public void onFailure(Call<List<ChartsArtist>> call, Throwable throwable) {
+            LOGGER.error("Error loading listening charts ({})", throwable.getMessage());
          }
       };
       sharedViewModel.getRhapsodySdkWrapper().loadTopPlayedArtists(null, RangeEnum.life, artistsCallback);
-      //
+
       Callback<List<ChartsAlbum>> albumCallback = new Callback<List<ChartsAlbum>>() {
 
          @Override
-         public void success(List<ChartsAlbum> albums, Response response) {
-            String string = "";
-            for (ChartsAlbum chartsAlbum : albums) {
-               try {
+         public void onResponse(Call<List<ChartsAlbum>> call, Response<List<ChartsAlbum>> response) {
+            if (response.isSuccessful()) {
+               String string = "";
+               for (ChartsAlbum chartsAlbum : response.body()) {
                   AlbumData albumData = sharedViewModel.getRhapsodySdkWrapper().getAlbum(chartsAlbum.id);
                   if (!string.isEmpty()) {
                      string += "\n";
                   }
-                  string += albumData.name + " - " + albumData.artist.name + " (" + chartsAlbum.playCount + " times)";
+                  if (albumData == null) {
+                     string += "<" + chartsAlbum.id + "> - ? (" + chartsAlbum.playCount + " times)";
+                  } else {
+                     string += albumData.name + " - " + albumData.artist.name + " (" + chartsAlbum.playCount
+                        + " times)";
+                  }
 
                   albumTextProperty().set(string);
-               } catch (RetrofitError error) {
-                  LOGGER.warn(error.getMessage(), error);
                }
-            }
 
-            loading.set(false);
+               loading.set(false);
+            } else {
+               LOGGER.error("Error loading listening charts ({} {})", response.code(), response.message());
+               sharedViewModel.handleError(new Throwable(response.message()), response.code(), () -> loadCharts());
+               loading.set(false);
+            }
          }
 
          @Override
-         public void failure(RetrofitError error) {
-            LOGGER.error(error.getMessage(), error);
-            sharedViewModel.handleError(error, () -> loadCharts());
+         public void onFailure(Call<List<ChartsAlbum>> call, Throwable throwable) {
+            LOGGER.error("Error loading listening charts ({})", throwable.getMessage());
+            sharedViewModel.handleError(throwable, -1, () -> loadCharts());
             loading.set(false);
          }
       };

@@ -107,6 +107,12 @@
             <version>4.1.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.7</version>
+        </dependency>
+
         <!-- Logging -->
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -142,7 +148,7 @@
         <dependency>
             <groupId>de.saxsys</groupId>
             <artifactId>jfx-testrunner</artifactId>
-            <version>1.2</version>
+            <version>1.1</version>
             <scope>test</scope>
         </dependency>
 

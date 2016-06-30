@@ -21,9 +21,9 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.image.Image;
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 @Singleton
 public final class AlbumTabViewModel implements ViewModel {
@@ -108,17 +108,23 @@ public final class AlbumTabViewModel implements ViewModel {
       sharedViewModel.getRhapsodySdkWrapper().loadAlbum(albumData.id, new Callback<AlbumData>() {
 
          @Override
-         public void success(AlbumData albumData, Response response) {
-            LOGGER.info("Loaded album '{}'", albumData.name);
-            setAlbum(albumData);
-            loadingProperty().set(false);
+         public void onResponse(Call<AlbumData> call, Response<AlbumData> response) {
+            if (response.isSuccessful()) {
+               LOGGER.info("Loaded album '{}'", response.body().name);
+               setAlbum(response.body());
+               loadingProperty().set(false);
+            } else {
+               loadingProperty().set(false);
+               LOGGER.error("Error loading album ({})", response.message());
+               sharedViewModel.handleError(new Throwable(response.message()), response.code(), () -> showAlbum());
+            }
          }
 
          @Override
-         public void failure(RetrofitError error) {
+         public void onFailure(Call<AlbumData> call, Throwable throwable) {
             loadingProperty().set(false);
-            LOGGER.error("Error loading album ({})", error.getMessage());
-            sharedViewModel.handleError(error, () -> showAlbum());
+            LOGGER.error("Error loading album ({})", throwable.getMessage());
+            sharedViewModel.handleError(throwable, -1, () -> showAlbum());
          }
       });
    }

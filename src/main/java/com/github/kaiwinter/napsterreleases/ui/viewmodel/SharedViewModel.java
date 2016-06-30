@@ -18,7 +18,6 @@ import com.github.kaiwinter.rhapsody.persistence.impl.PreferencesAuthorizationSt
 import javafx.application.Platform;
 import javafx.stage.Window;
 import javafx.util.Pair;
-import retrofit.RetrofitError;
 
 /**
  * A View Model which is shared between the other View Models. Most obvious to provide common methods as
@@ -39,7 +38,7 @@ public class SharedViewModel {
       RhapsodyApiKeyProperties rhapsodyApiKeyConfig = new RhapsodyApiKeyProperties();
       rhapsodySdkWrapper = new RhapsodySdkWrapper(rhapsodyApiKeyConfig.apiKey, rhapsodyApiKeyConfig.apiSecret,
          new PreferencesAuthorizationStore());
-      // rhapsodySdkWrapper.setVerboseLoggingEnabled(true);
+      rhapsodySdkWrapper.setVerboseLoggingEnabled(true);
    }
 
    /**
@@ -57,9 +56,9 @@ public class SharedViewModel {
     * @param actionRetryCallback
     *           the callback to execute if the error could be solved
     */
-   public void handleError(RetrofitError error, ActionRetryCallback actionRetryCallback) {
+   public void handleError(Throwable error, int httpCode, ActionRetryCallback actionRetryCallback) {
 
-      if (error.getResponse() != null && error.getResponse().getStatus() == 401) {
+      if (httpCode == 401) {
          tryReAuthorization(actionRetryCallback);
       } else {
          Platform.runLater(() -> {
