@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.kaiwinter.napsterreleases.util.TimeUtil;
+import com.github.kaiwinter.rhapsody.api.RhapsodyCallback;
 import com.github.kaiwinter.rhapsody.model.AlbumData;
 
 import de.saxsys.mvvmfx.ViewModel;
@@ -21,9 +22,6 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.image.Image;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 @Singleton
 public final class AlbumTabViewModel implements ViewModel {
@@ -105,27 +103,21 @@ public final class AlbumTabViewModel implements ViewModel {
          return;
       }
       loadingProperty().set(true);
-      sharedViewModel.getRhapsodySdkWrapper().loadAlbum(albumData.id, new Callback<AlbumData>() {
+      sharedViewModel.getRhapsodySdkWrapper().loadAlbum(albumData.id, new RhapsodyCallback<AlbumData>() {
 
          @Override
-         public void onResponse(Call<AlbumData> call, Response<AlbumData> response) {
-            if (response.isSuccessful()) {
-               LOGGER.info("Loaded album '{}'", response.body().name);
-               setAlbum(response.body());
-               loadingProperty().set(false);
-            } else {
-               loadingProperty().set(false);
-               LOGGER.error("Error loading album ({})", response.message());
-               sharedViewModel.handleError(new Throwable(response.message()), response.code(), () -> showAlbum());
-            }
-         }
-
-         @Override
-         public void onFailure(Call<AlbumData> call, Throwable throwable) {
+         public void onSuccess(AlbumData albumData) {
+            LOGGER.info("Loaded album '{}'", albumData.name);
+            setAlbum(albumData);
             loadingProperty().set(false);
-            LOGGER.error("Error loading album ({})", throwable.getMessage());
-            sharedViewModel.handleError(throwable, -1, () -> showAlbum());
          }
+
+         @Override
+         public void onFailure(Throwable throwable, int code) {
+            LOGGER.error("Error loading album ({} {})", code, throwable.getMessage());
+            sharedViewModel.handleError(throwable, code, () -> showAlbum());
+         }
+
       });
    }
 

@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import com.github.kaiwinter.jfx.tablecolumn.filter.FilterSupport;
 import com.github.kaiwinter.napsterreleases.persistence.UISettings;
+import com.github.kaiwinter.rhapsody.api.RhapsodyCallback;
 import com.github.kaiwinter.rhapsody.model.AccountData;
 import com.github.kaiwinter.rhapsody.model.AlbumData;
 import com.github.kaiwinter.rhapsody.model.GenreData;
@@ -26,9 +27,6 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 @Singleton
 public final class NewReleasesTabViewModel implements ViewModel {
@@ -119,27 +117,23 @@ public final class NewReleasesTabViewModel implements ViewModel {
    public void loadGenres() {
       clearData();
       loadingProperty().set(true);
-      sharedViewModel.getRhapsodySdkWrapper().loadGenres(new Callback<Collection<GenreData>>() {
+
+      RhapsodyCallback<Collection<GenreData>> rhapsodyCallback = new RhapsodyCallback<Collection<GenreData>>() {
 
          @Override
-         public void onResponse(Call<Collection<GenreData>> call, Response<Collection<GenreData>> response) {
-            if (response.isSuccessful()) {
-               LOGGER.info("Loaded {} genres", response.body().size());
-               setGenres(response.body());
-               loadingProperty().set(false);
-            } else {
-               loadingProperty().set(false);
-               LOGGER.error("Error loading genres ({})", response.message());
-               sharedViewModel.handleError(new Throwable(response.message()), response.code(), () -> loadGenres());
-            }
+         public void onSuccess(Collection<GenreData> data) {
+            LOGGER.info("Loaded {} genres", data.size());
+            setGenres(data);
+            loadingProperty().set(false);
          }
 
          @Override
-         public void onFailure(Call<Collection<GenreData>> call, Throwable throwable) {
-            LOGGER.error("Error loading genres ({})", throwable.getMessage());
-            sharedViewModel.handleError(throwable, -1, () -> loadGenres());
+         public void onFailure(Throwable throwable, int code) {
+            LOGGER.error("Error loading genres ({} {})", code, throwable.getMessage());
+            sharedViewModel.handleError(throwable, code, () -> loadGenres());
          }
-      });
+      };
+      sharedViewModel.getRhapsodySdkWrapper().loadGenres(rhapsodyCallback);
    }
 
    private void setGenres(Collection<GenreData> genres) {
@@ -173,72 +167,62 @@ public final class NewReleasesTabViewModel implements ViewModel {
 
    public void showNewReleases(GenreData genreData) {
       loadingProperty().set(true);
-      Callback<Collection<AlbumData>> callback = new Callback<Collection<AlbumData>>() {
+
+      RhapsodyCallback<Collection<AlbumData>> rhapsodyCallback = new RhapsodyCallback<Collection<AlbumData>>() {
 
          @Override
-         public void onResponse(Call<Collection<AlbumData>> call, Response<Collection<AlbumData>> response) {
-            if (response.isSuccessful()) {
-               LOGGER.info("Loaded {} albums", response.body().size());
-               // Check if genre selection changed in the meantime
-               GenreData currentGenre = selectedGenreProperty().get().getValue();
-               if (currentGenre != null && currentGenre == genreData) {
-                  @SuppressWarnings("unchecked")
-                  ObservableList<AlbumData> items = (ObservableList<AlbumData>) FilterSupport
-                     .getUnwrappedList(releasesProperty().get());
-                  Platform.runLater(() -> {
-                     items.setAll(response.body());
-                  });
-                  loadingProperty().set(false);
-               } else {
-                  LOGGER.info("Genre selection changed, not showing loaded data");
-               }
-            } else {
+         public void onSuccess(Collection<AlbumData> data) {
+            LOGGER.info("Loaded {} albums", data.size());
+            // Check if genre selection changed in the meantime
+            GenreData currentGenre = selectedGenreProperty().get().getValue();
+            if (currentGenre != null && currentGenre == genreData) {
+               @SuppressWarnings("unchecked")
+               ObservableList<AlbumData> items = (ObservableList<AlbumData>) FilterSupport
+                  .getUnwrappedList(releasesProperty().get());
+               Platform.runLater(() -> {
+                  items.setAll(data);
+               });
                loadingProperty().set(false);
-               LOGGER.error("Error loading albums ({})", response.message());
-               sharedViewModel.handleError(new Throwable(response.message()), response.code(),
-                  () -> showNewReleases(genreData));
+            } else {
+               LOGGER.info("Genre selection changed, not showing loaded data");
             }
          }
 
          @Override
-         public void onFailure(Call<Collection<AlbumData>> call, Throwable throwable) {
+         public void onFailure(Throwable throwable, int code) {
             loadingProperty().set(false);
-            LOGGER.error("Error loading albums ({})", throwable.getMessage());
-            sharedViewModel.handleError(throwable, -1, () -> showNewReleases(genreData));
+            LOGGER.error("Error loading albums ({} {})", code, throwable.getMessage());
+            sharedViewModel.handleError(throwable, code, () -> showNewReleases(genreData));
          }
       };
 
       if (RHAPSODY_CURATED.equals(genreData.id)) {
-         sharedViewModel.getRhapsodySdkWrapper().loadAlbumNewReleases(null, callback);
+         sharedViewModel.getRhapsodySdkWrapper().loadAlbumNewReleases(null, rhapsodyCallback);
       } else if (RHAPSODY_PERSONALIZED.equals(genreData.id)) {
-         loadPersonalizedNewReleases(callback);
+         loadPersonalizedNewReleases(rhapsodyCallback);
       } else {
-         sharedViewModel.getRhapsodySdkWrapper().loadGenreNewReleases(genreData.id, null, callback);
+         sharedViewModel.getRhapsodySdkWrapper().loadGenreNewReleases(genreData.id, null, rhapsodyCallback);
       }
    }
 
-   private void loadPersonalizedNewReleases(Callback<Collection<AlbumData>> callback) {
+   private void loadPersonalizedNewReleases(RhapsodyCallback<Collection<AlbumData>> callback) {
       if (userAccountData == null) {
-         Callback<AccountData> loadUserAccountCallback = new Callback<AccountData>() {
+         RhapsodyCallback<AccountData> rhapsodyCallbackAccountData = new RhapsodyCallback<AccountData>() {
 
             @Override
-            public void onResponse(Call<AccountData> call, Response<AccountData> response) {
-               if (response.isSuccessful()) {
-                  NewReleasesTabViewModel.this.userAccountData = userAccountData;
-                  sharedViewModel.getRhapsodySdkWrapper().loadAlbumNewReleases(userAccountData.id, callback);
-               } else {
-                  LOGGER.error("Error loading account information ({})", response.message());
-                  callback.onFailure(null, new Throwable(response.message()));
-               }
+            public void onSuccess(AccountData data) {
+               NewReleasesTabViewModel.this.userAccountData = userAccountData;
+               sharedViewModel.getRhapsodySdkWrapper().loadAlbumNewReleases(userAccountData.id, callback);
             }
 
             @Override
-            public void onFailure(Call<AccountData> call, Throwable throwable) {
-               LOGGER.error("Error loading account information ({})", throwable.getMessage());
-               callback.onFailure(null, throwable);
+            public void onFailure(Throwable throwable, int code) {
+               LOGGER.error("Error loading account information ({} {})", code, throwable.getMessage());
+               callback.onFailure(throwable, code);
             }
          };
-         sharedViewModel.getRhapsodySdkWrapper().loadAccount(loadUserAccountCallback);
+
+         sharedViewModel.getRhapsodySdkWrapper().loadAccount(rhapsodyCallbackAccountData);
       } else {
          sharedViewModel.getRhapsodySdkWrapper().loadAlbumNewReleases(userAccountData.id, callback);
       }

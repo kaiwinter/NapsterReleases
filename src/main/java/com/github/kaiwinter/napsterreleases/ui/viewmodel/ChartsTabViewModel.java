@@ -8,6 +8,7 @@ import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.kaiwinter.rhapsody.api.RhapsodyCallback;
 import com.github.kaiwinter.rhapsody.model.AlbumData;
 import com.github.kaiwinter.rhapsody.model.ArtistData;
 import com.github.kaiwinter.rhapsody.model.member.ChartsAlbum;
@@ -19,9 +20,6 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 @Singleton
 public final class ChartsTabViewModel implements ViewModel {
@@ -42,66 +40,56 @@ public final class ChartsTabViewModel implements ViewModel {
    }
 
    public void loadCharts() {
-      Callback<List<ChartsArtist>> artistsCallback = new Callback<List<ChartsArtist>>() {
+
+      RhapsodyCallback<List<ChartsArtist>> artistsCallback = new RhapsodyCallback<List<ChartsArtist>>() {
 
          @Override
-         public void onResponse(Call<List<ChartsArtist>> call, Response<List<ChartsArtist>> response) {
-            if (response.isSuccessful()) {
-               String string = "";
-               for (ChartsArtist chartsArtist : response.body()) {
-                  ArtistData artistMeta = sharedViewModel.getRhapsodySdkWrapper().getArtistMeta(chartsArtist.id);
-                  if (!string.isEmpty()) {
-                     string += "\n";
-                  }
-                  string += artistMeta.name + " (" + chartsArtist.playCount + " times)";
-
-                  artistsTextProperty().set(string);
+         public void onSuccess(List<ChartsArtist> data) {
+            String string = "";
+            for (ChartsArtist chartsArtist : data) {
+               ArtistData artistMeta = sharedViewModel.getRhapsodySdkWrapper().getArtistMeta(chartsArtist.id);
+               if (!string.isEmpty()) {
+                  string += "\n";
                }
-            } else {
-               LOGGER.error("Error loading listening charts ({} {})", response.code(), response.message());
+               string += artistMeta.name + " (" + chartsArtist.playCount + " times)";
+
+               artistsTextProperty().set(string);
             }
          }
 
          @Override
-         public void onFailure(Call<List<ChartsArtist>> call, Throwable throwable) {
-            LOGGER.error("Error loading listening charts ({})", throwable.getMessage());
+         public void onFailure(Throwable throwable, int code) {
+            LOGGER.error("Error loading listening charts ({} {})", code, throwable.getMessage());
          }
       };
       sharedViewModel.getRhapsodySdkWrapper().loadTopPlayedArtists(null, RangeEnum.life, artistsCallback);
 
-      Callback<List<ChartsAlbum>> albumCallback = new Callback<List<ChartsAlbum>>() {
+      RhapsodyCallback<List<ChartsAlbum>> albumCallback = new RhapsodyCallback<List<ChartsAlbum>>() {
 
          @Override
-         public void onResponse(Call<List<ChartsAlbum>> call, Response<List<ChartsAlbum>> response) {
-            if (response.isSuccessful()) {
-               String string = "";
-               for (ChartsAlbum chartsAlbum : response.body()) {
-                  AlbumData albumData = sharedViewModel.getRhapsodySdkWrapper().getAlbum(chartsAlbum.id);
-                  if (!string.isEmpty()) {
-                     string += "\n";
-                  }
-                  if (albumData == null) {
-                     string += "<" + chartsAlbum.id + "> - ? (" + chartsAlbum.playCount + " times)";
-                  } else {
-                     string += albumData.name + " - " + albumData.artist.name + " (" + chartsAlbum.playCount
-                        + " times)";
-                  }
-
-                  albumTextProperty().set(string);
+         public void onSuccess(List<ChartsAlbum> data) {
+            String string = "";
+            for (ChartsAlbum chartsAlbum : data) {
+               AlbumData albumData = sharedViewModel.getRhapsodySdkWrapper().getAlbum(chartsAlbum.id);
+               if (!string.isEmpty()) {
+                  string += "\n";
+               }
+               if (albumData == null) {
+                  string += "<" + chartsAlbum.id + "> - ? (" + chartsAlbum.playCount + " times)";
+               } else {
+                  string += albumData.name + " - " + albumData.artist.name + " (" + chartsAlbum.playCount + " times)";
                }
 
-               loading.set(false);
-            } else {
-               LOGGER.error("Error loading listening charts ({} {})", response.code(), response.message());
-               sharedViewModel.handleError(new Throwable(response.message()), response.code(), () -> loadCharts());
-               loading.set(false);
+               albumTextProperty().set(string);
             }
+
+            loading.set(false);
          }
 
          @Override
-         public void onFailure(Call<List<ChartsAlbum>> call, Throwable throwable) {
-            LOGGER.error("Error loading listening charts ({})", throwable.getMessage());
-            sharedViewModel.handleError(throwable, -1, () -> loadCharts());
+         public void onFailure(Throwable throwable, int code) {
+            LOGGER.error("Error loading listening charts ({} {})", code, throwable.getMessage());
+            sharedViewModel.handleError(throwable, code, () -> loadCharts());
             loading.set(false);
          }
       };

@@ -93,12 +93,6 @@
             <groupId>de.saxsys</groupId>
             <artifactId>mvvmfx-guice</artifactId>
             <version>1.5.1</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>guice</artifactId>
-                    <groupId>com.google.inject</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>

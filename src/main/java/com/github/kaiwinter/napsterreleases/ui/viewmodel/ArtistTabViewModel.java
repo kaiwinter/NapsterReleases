@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.kaiwinter.rhapsody.api.ArtistImageSize;
+import com.github.kaiwinter.rhapsody.api.RhapsodyCallback;
 import com.github.kaiwinter.rhapsody.model.AlbumData;
 import com.github.kaiwinter.rhapsody.model.ArtistData;
 import com.github.kaiwinter.rhapsody.model.BioData;
@@ -22,9 +23,6 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.image.Image;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 @Singleton
 public final class ArtistTabViewModel implements ViewModel {
@@ -89,50 +87,41 @@ public final class ArtistTabViewModel implements ViewModel {
       Image image = new Image(imageUrl, true);
       imageProperty().set(image);
 
-      sharedViewModel.getRhapsodySdkWrapper().loadArtistMeta(artistId, new Callback<ArtistData>() {
+      RhapsodyCallback<ArtistData> artistCallback = new RhapsodyCallback<ArtistData>() {
 
          @Override
-         public void onResponse(Call<ArtistData> call, Response<ArtistData> response) {
-            if (response.isSuccessful()) {
-               LOGGER.info("Loaded artist '{}'", response.body().name);
-               nameProperty().set(response.body().name);
-            } else {
-               LOGGER.error("Error loading artist ({})", response.message());
-               sharedViewModel.handleError(new Throwable(response.message()), response.code(), () -> showArtist());
-            }
+         public void onSuccess(ArtistData data) {
+            LOGGER.info("Loaded artist '{}'", data.name);
+            nameProperty().set(data.name);
          }
 
          @Override
-         public void onFailure(Call<ArtistData> call, Throwable throwable) {
-            LOGGER.error("Error loading artist ({})", throwable.getMessage());
-            sharedViewModel.handleError(new Throwable(throwable.getMessage()), -1, () -> showArtist());
+         public void onFailure(Throwable throwable, int code) {
+            LOGGER.error("Error loading artist ({} {})", code, throwable.getMessage());
+            sharedViewModel.handleError(throwable, code, () -> showArtist());
          }
-      });
+      };
 
-      sharedViewModel.getRhapsodySdkWrapper().loadArtistBio(artistId, new Callback<BioData>() {
+      sharedViewModel.getRhapsodySdkWrapper().loadArtistMeta(artistId, artistCallback);
+
+      RhapsodyCallback<BioData> bioCallback = new RhapsodyCallback<BioData>() {
 
          @Override
-         public void onResponse(Call<BioData> call, Response<BioData> response) {
-            if (response.isSuccessful()) {
-               LOGGER.info("Loaded bio, empty: {}, blurbs #: {}", response.body().bio.isEmpty(),
-                  response.body().blurbs.size());
-               String blurbs = response.body().blurbs.stream().collect(Collectors.joining(",\n"));
-               bioProperty().set(response.body().bio);
-               blubsProperty().set(blurbs);
-               loadingProperty().set(false);
-            } else {
-               loadingProperty().set(false);
-               LOGGER.error("Error loading bio ({})", response.message());
-               sharedViewModel.handleError(new Throwable(response.message()), response.code(), () -> showArtist());
-            }
-         }
-
-         @Override
-         public void onFailure(Call<BioData> call, Throwable throwable) {
+         public void onSuccess(BioData data) {
+            LOGGER.info("Loaded bio, empty: {}, blurbs #: {}", data.bio.isEmpty(), data.blurbs.size());
+            String blurbs = data.blurbs.stream().collect(Collectors.joining(",\n"));
+            bioProperty().set(data.bio);
+            blubsProperty().set(blurbs);
             loadingProperty().set(false);
-            LOGGER.error("Error loading bio ({})", throwable.getMessage());
-            sharedViewModel.handleError(throwable, -1, () -> showArtist());
          }
-      });
+
+         @Override
+         public void onFailure(Throwable throwable, int code) {
+            loadingProperty().set(false);
+            LOGGER.error("Error loading bio ({} {})", code, throwable.getMessage());
+            sharedViewModel.handleError(throwable, code, () -> showArtist());
+         }
+      };
+      sharedViewModel.getRhapsodySdkWrapper().loadArtistBio(artistId, bioCallback);
    }
 }

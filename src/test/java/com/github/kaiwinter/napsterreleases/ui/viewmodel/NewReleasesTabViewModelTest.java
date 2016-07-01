@@ -16,6 +16,7 @@ import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import com.github.kaiwinter.rhapsody.api.RhapsodyCallback;
 import com.github.kaiwinter.rhapsody.api.RhapsodySdkWrapper;
 import com.github.kaiwinter.rhapsody.model.AlbumData;
 import com.github.kaiwinter.rhapsody.model.GenreData;
@@ -28,8 +29,6 @@ import de.saxsys.javafx.test.JfxRunner;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 @RunWith(JfxRunner.class)
 public final class NewReleasesTabViewModelTest {
@@ -42,11 +41,12 @@ public final class NewReleasesTabViewModelTest {
          protected void configure() {
             RhapsodySdkWrapper rhapsodySdkWrapperMock = mock(RhapsodySdkWrapper.class);
             Collection<GenreData> genres = Collections.singletonList(new GenreData());
-            doAnswer(new LoadGenresResultAnswer(genres)).when(rhapsodySdkWrapperMock).loadGenres(any(Callback.class));
+            doAnswer(new LoadGenresResultAnswer(genres)).when(rhapsodySdkWrapperMock)
+               .loadGenres(any(RhapsodyCallback.class));
 
             Collection<AlbumData> releases = Collections.singletonList(new AlbumData());
             doAnswer(new LoadNewReleasesAnswer(releases)).when(rhapsodySdkWrapperMock).loadGenreNewReleases(anyString(),
-               anyInt(), any(Callback.class));
+               anyInt(), any(RhapsodyCallback.class));
 
             SharedViewModel sharedViewModelMock = mock(SharedViewModel.class);
             when(sharedViewModelMock.getRhapsodySdkWrapper()).thenReturn(rhapsodySdkWrapperMock);
@@ -96,7 +96,7 @@ public final class NewReleasesTabViewModelTest {
 
       @Override
       public Void answer(InvocationOnMock invocation) throws Throwable {
-         ((Callback<Collection<GenreData>>) invocation.getArguments()[0]).onResponse(null, Response.success(genres));
+         ((RhapsodyCallback<Collection<GenreData>>) invocation.getArguments()[0]).onSuccess(genres);
          return null;
       }
    }
@@ -110,7 +110,7 @@ public final class NewReleasesTabViewModelTest {
 
       @Override
       public Void answer(InvocationOnMock invocation) throws Throwable {
-         ((Callback<Collection<AlbumData>>) invocation.getArguments()[2]).onResponse(null, Response.success(releases));
+         ((RhapsodyCallback<Collection<AlbumData>>) invocation.getArguments()[2]).onSuccess(releases);
          return null;
       }
    }
