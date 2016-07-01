@@ -16,6 +16,8 @@ import com.github.kaiwinter.rhapsody.api.RhapsodySdkWrapper;
 import com.github.kaiwinter.rhapsody.persistence.impl.PreferencesAuthorizationStore;
 
 import javafx.application.Platform;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Window;
 import javafx.util.Pair;
 
@@ -51,18 +53,18 @@ public class SharedViewModel {
     * former fails. If the authorization was successful the <code>actionretryCallback</code> is called.
     * </p>
     * 
-    * @param error
-    *           the error to handle
+    * @param message
+    *           the message to show
     * @param actionRetryCallback
     *           the callback to execute if the error could be solved
     */
-   public void handleError(Throwable error, int httpCode, ActionRetryCallback actionRetryCallback) {
+   public void handleError(String message, int httpCode, ActionRetryCallback actionRetryCallback) {
 
       if (httpCode == 401) {
          tryReAuthorization(actionRetryCallback);
       } else {
          Platform.runLater(() -> {
-            ExceptionDialog exceptionDialog = new ExceptionDialog(error);
+            Alert exceptionDialog = new Alert(AlertType.ERROR, message);
             exceptionDialog.show();
          });
       }

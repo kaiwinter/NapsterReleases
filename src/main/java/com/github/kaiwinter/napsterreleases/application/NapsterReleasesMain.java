@@ -24,6 +24,9 @@ public final class NapsterReleasesMain extends MvvmfxGuiceApplication {
    private static final Logger LOGGER = LoggerFactory.getLogger(NapsterReleasesMain.class.getSimpleName());
 
    public static void main(String... args) throws IOException {
+      System.setProperty("proxyHost", "firewall");
+      System.setProperty("proxyPort", "3128");
+
       launch(args);
    }
 

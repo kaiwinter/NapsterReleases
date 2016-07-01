@@ -10,7 +10,6 @@ import java.util.Comparator;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.controlsfx.dialog.ExceptionDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +31,8 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 
@@ -92,10 +93,10 @@ public final class LibraryTabViewModel implements ViewModel {
          }
 
          @Override
-         public void onFailure(Throwable throwable, int code) {
-            LOGGER.error(throwable.getMessage());
+         public void onFailure(int code, String message) {
+            LOGGER.error(message);
             loadingProperty().set(false);
-            sharedViewModel.handleError(throwable, code, () -> loadAllArtistsInLibrary());
+            sharedViewModel.handleError(message, code, () -> loadAllArtistsInLibrary());
          }
       };
       sharedViewModel.getRhapsodySdkWrapper().loadAllArtistsInLibrary(null, callback);
@@ -122,10 +123,10 @@ public final class LibraryTabViewModel implements ViewModel {
          }
 
          @Override
-         public void onFailure(Throwable throwable, int code) {
-            LOGGER.error("Error loading albums ({})", throwable.getMessage());
+         public void onFailure(int code, String message) {
+            LOGGER.error("Error loading albums ({})", message);
             loadingProperty().set(false);
-            sharedViewModel.handleError(throwable, code, () -> loadAlbumsOfSelectedArtist(artist));
+            sharedViewModel.handleError(message, code, () -> loadAlbumsOfSelectedArtist(artist));
          }
       };
       sharedViewModel.getRhapsodySdkWrapper().loadAllAlbumsByArtistInLibrary(artist.id, null, callback);
@@ -168,11 +169,11 @@ public final class LibraryTabViewModel implements ViewModel {
          }
 
          @Override
-         public void onFailure(Throwable throwable, int code) {
-            LOGGER.error("Error exporting library ({} {})", code, throwable.getMessage());
+         public void onFailure(int code, String message) {
+            LOGGER.error("Error exporting library ({} {})", code, message);
             loadingProperty().set(false);
             Platform.runLater(() -> {
-               ExceptionDialog exceptionDialog = new ExceptionDialog(throwable);
+               Alert exceptionDialog = new Alert(AlertType.ERROR, message);
                exceptionDialog.show();
             });
          }
@@ -197,10 +198,10 @@ public final class LibraryTabViewModel implements ViewModel {
          }
 
          @Override
-         public void onFailure(Throwable throwable, int code) {
-            LOGGER.error("Error removing artist from library ({} {})", code, throwable.getMessage());
+         public void onFailure(int code, String message) {
+            LOGGER.error("Error removing artist from library ({} {})", code, message);
             loadingProperty().set(false);
-            sharedViewModel.handleError(throwable, code, () -> removeArtistFromLibrary(albumData));
+            sharedViewModel.handleError(message, code, () -> removeArtistFromLibrary(albumData));
          }
       };
       sharedViewModel.getRhapsodySdkWrapper().removeAlbumFromLibrary(albumData.id, callback);
@@ -216,10 +217,10 @@ public final class LibraryTabViewModel implements ViewModel {
          }
 
          @Override
-         public void onFailure(Throwable throwable, int code) {
-            LOGGER.error("Error adding album to library ({} {})", code, throwable.getMessage());
+         public void onFailure(int code, String message) {
+            LOGGER.error("Error adding album to library ({} {})", code, message);
             loadingProperty().set(false);
-            sharedViewModel.handleError(throwable, -1, () -> removeArtistFromLibrary(albumData));
+            sharedViewModel.handleError(message, -1, () -> removeArtistFromLibrary(albumData));
          }
       };
       sharedViewModel.getRhapsodySdkWrapper().addAlbumToLibrary(albumData.id, callback);

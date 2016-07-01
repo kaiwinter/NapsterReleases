@@ -128,9 +128,9 @@ public final class NewReleasesTabViewModel implements ViewModel {
          }
 
          @Override
-         public void onFailure(Throwable throwable, int code) {
-            LOGGER.error("Error loading genres ({} {})", code, throwable.getMessage());
-            sharedViewModel.handleError(throwable, code, () -> loadGenres());
+         public void onFailure(int code, String message) {
+            LOGGER.error("Error loading genres ({} {})", code, message);
+            sharedViewModel.handleError(message, code, () -> loadGenres());
          }
       };
       sharedViewModel.getRhapsodySdkWrapper().loadGenres(rhapsodyCallback);
@@ -189,10 +189,10 @@ public final class NewReleasesTabViewModel implements ViewModel {
          }
 
          @Override
-         public void onFailure(Throwable throwable, int code) {
+         public void onFailure(int code, String message) {
             loadingProperty().set(false);
-            LOGGER.error("Error loading albums ({} {})", code, throwable.getMessage());
-            sharedViewModel.handleError(throwable, code, () -> showNewReleases(genreData));
+            LOGGER.error("Error loading albums ({} {})", code, message);
+            sharedViewModel.handleError(message, code, () -> showNewReleases(genreData));
          }
       };
 
@@ -216,9 +216,9 @@ public final class NewReleasesTabViewModel implements ViewModel {
             }
 
             @Override
-            public void onFailure(Throwable throwable, int code) {
-               LOGGER.error("Error loading account information ({} {})", code, throwable.getMessage());
-               callback.onFailure(throwable, code);
+            public void onFailure(int code, String message) {
+               LOGGER.error("Error loading account information ({} {})", code, message);
+               callback.onFailure(code, message);
             }
          };
 

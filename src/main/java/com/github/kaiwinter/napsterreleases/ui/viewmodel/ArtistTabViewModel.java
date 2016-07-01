@@ -96,9 +96,9 @@ public final class ArtistTabViewModel implements ViewModel {
          }
 
          @Override
-         public void onFailure(Throwable throwable, int code) {
-            LOGGER.error("Error loading artist ({} {})", code, throwable.getMessage());
-            sharedViewModel.handleError(throwable, code, () -> showArtist());
+         public void onFailure(int code, String message) {
+            LOGGER.error("Error loading artist ({} {})", code, message);
+            sharedViewModel.handleError(message, code, () -> showArtist());
          }
       };
 
@@ -116,10 +116,10 @@ public final class ArtistTabViewModel implements ViewModel {
          }
 
          @Override
-         public void onFailure(Throwable throwable, int code) {
+         public void onFailure(int code, String message) {
             loadingProperty().set(false);
-            LOGGER.error("Error loading bio ({} {})", code, throwable.getMessage());
-            sharedViewModel.handleError(throwable, code, () -> showArtist());
+            LOGGER.error("Error loading bio ({} {})", code, message);
+            sharedViewModel.handleError(message, code, () -> showArtist());
          }
       };
       sharedViewModel.getRhapsodySdkWrapper().loadArtistBio(artistId, bioCallback);

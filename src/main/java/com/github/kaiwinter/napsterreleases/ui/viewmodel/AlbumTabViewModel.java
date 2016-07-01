@@ -113,9 +113,9 @@ public final class AlbumTabViewModel implements ViewModel {
          }
 
          @Override
-         public void onFailure(Throwable throwable, int code) {
-            LOGGER.error("Error loading album ({} {})", code, throwable.getMessage());
-            sharedViewModel.handleError(throwable, code, () -> showAlbum());
+         public void onFailure(int code, String message) {
+            LOGGER.error("Error loading album ({} {})", code, message);
+            sharedViewModel.handleError(message, code, () -> showAlbum());
          }
 
       });

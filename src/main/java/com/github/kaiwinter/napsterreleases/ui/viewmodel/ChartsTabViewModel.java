@@ -58,8 +58,8 @@ public final class ChartsTabViewModel implements ViewModel {
          }
 
          @Override
-         public void onFailure(Throwable throwable, int code) {
-            LOGGER.error("Error loading listening charts ({} {})", code, throwable.getMessage());
+         public void onFailure(int code, String message) {
+            LOGGER.error("Error loading listening charts ({} {})", code, message);
          }
       };
       sharedViewModel.getRhapsodySdkWrapper().loadTopPlayedArtists(null, RangeEnum.life, artistsCallback);
@@ -87,9 +87,9 @@ public final class ChartsTabViewModel implements ViewModel {
          }
 
          @Override
-         public void onFailure(Throwable throwable, int code) {
-            LOGGER.error("Error loading listening charts ({} {})", code, throwable.getMessage());
-            sharedViewModel.handleError(throwable, code, () -> loadCharts());
+         public void onFailure(int code, String message) {
+            LOGGER.error("Error loading listening charts ({} {})", code, message);
+            sharedViewModel.handleError(message, code, () -> loadCharts());
             loading.set(false);
          }
       };
