@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import com.github.kaiwinter.jfx.tablecolumn.filter.FilterSupport;
 import com.github.kaiwinter.napsterreleases.persistence.UISettings;
+import com.github.kaiwinter.rhapsody.api.RhapsodyCallback;
 import com.github.kaiwinter.rhapsody.model.AccountData;
 import com.github.kaiwinter.rhapsody.model.AlbumData;
 import com.github.kaiwinter.rhapsody.model.GenreData;
@@ -26,9 +27,6 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
 
 @Singleton
 public final class NewReleasesTabViewModel implements ViewModel {
@@ -119,20 +117,20 @@ public final class NewReleasesTabViewModel implements ViewModel {
    public void loadGenres() {
       clearData();
       loadingProperty().set(true);
-      sharedViewModel.getRhapsodySdkWrapper().loadGenres(new Callback<Collection<GenreData>>() {
+      sharedViewModel.getRhapsodySdkWrapper().loadGenres(new RhapsodyCallback<Collection<GenreData>>() {
 
          @Override
-         public void success(Collection<GenreData> genres, Response response) {
+         public void onSuccess(Collection<GenreData> genres) {
             LOGGER.info("Loaded {} genres", genres.size());
             setGenres(genres);
             loadingProperty().set(false);
          }
 
          @Override
-         public void failure(RetrofitError error) {
+         public void onFailure(int httpCode, String message) {
             loadingProperty().set(false);
-            LOGGER.error("Error loading genres ({})", error.getMessage());
-            sharedViewModel.handleError(error, () -> loadGenres());
+            LOGGER.error("Error loading genres ({})", message);
+            sharedViewModel.handleError(httpCode, message, () -> loadGenres());
          }
       });
    }
@@ -168,9 +166,9 @@ public final class NewReleasesTabViewModel implements ViewModel {
 
    public void showNewReleases(GenreData genreData) {
       loadingProperty().set(true);
-      Callback<Collection<AlbumData>> callback = new Callback<Collection<AlbumData>>() {
+      RhapsodyCallback<Collection<AlbumData>> callback = new RhapsodyCallback<Collection<AlbumData>>() {
          @Override
-         public void success(Collection<AlbumData> albums, Response response) {
+         public void onSuccess(Collection<AlbumData> albums) {
             LOGGER.info("Loaded {} albums", albums.size());
             // Check if genre selection changed in the meantime
             GenreData currentGenre = selectedGenreProperty().get().getValue();
@@ -188,10 +186,10 @@ public final class NewReleasesTabViewModel implements ViewModel {
          }
 
          @Override
-         public void failure(RetrofitError error) {
+         public void onFailure(int httpCode, String message) {
             loadingProperty().set(false);
-            LOGGER.error("Error loading albums ({})", error.getMessage());
-            sharedViewModel.handleError(error, () -> showNewReleases(genreData));
+            LOGGER.error("Error loading albums ({})", message);
+            sharedViewModel.handleError(httpCode, message, () -> showNewReleases(genreData));
          }
       };
 
@@ -204,20 +202,19 @@ public final class NewReleasesTabViewModel implements ViewModel {
       }
    }
 
-   private void loadPersonalizedNewReleases(Callback<Collection<AlbumData>> callback) {
+   private void loadPersonalizedNewReleases(RhapsodyCallback<Collection<AlbumData>> callback) {
       if (userAccountData == null) {
-         Callback<AccountData> loadUserAccountCallback = new Callback<AccountData>() {
-
+         RhapsodyCallback<AccountData> loadUserAccountCallback = new RhapsodyCallback<AccountData>() {
             @Override
-            public void success(AccountData userAccountData, Response response) {
+            public void onSuccess(AccountData userAccountData) {
                NewReleasesTabViewModel.this.userAccountData = userAccountData;
                sharedViewModel.getRhapsodySdkWrapper().loadAlbumNewReleases(userAccountData.id, callback);
             }
 
             @Override
-            public void failure(RetrofitError error) {
-               LOGGER.error("Error loading account information ({})", error.getMessage());
-               callback.failure(error);
+            public void onFailure(int httpCode, String message) {
+               LOGGER.error("Error loading account information ({} {})", httpCode, message);
+               callback.onFailure(httpCode, message);
             }
          };
          sharedViewModel.getRhapsodySdkWrapper().loadAccount(loadUserAccountCallback);

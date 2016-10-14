@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.kaiwinter.rhapsody.api.ArtistImageSize;
+import com.github.kaiwinter.rhapsody.api.RhapsodyCallback;
 import com.github.kaiwinter.rhapsody.model.AlbumData;
 import com.github.kaiwinter.rhapsody.model.ArtistData;
 import com.github.kaiwinter.rhapsody.model.BioData;
@@ -22,9 +23,6 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.image.Image;
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
 
 @Singleton
 public final class ArtistTabViewModel implements ViewModel {
@@ -89,35 +87,35 @@ public final class ArtistTabViewModel implements ViewModel {
       Image image = new Image(imageUrl, true);
       imageProperty().set(image);
 
-      sharedViewModel.getRhapsodySdkWrapper().loadArtistMeta(artistId, new Callback<ArtistData>() {
+      sharedViewModel.getRhapsodySdkWrapper().loadArtistMeta(artistId, new RhapsodyCallback<ArtistData>() {
          @Override
-         public void success(ArtistData artistData, Response response) {
+         public void onSuccess(ArtistData artistData) {
             LOGGER.info("Loaded artist '{}'", artistData.name);
             nameProperty().set(artistData.name);
          }
 
          @Override
-         public void failure(RetrofitError error) {
-            LOGGER.error("Error loading artist ({})", error.getMessage());
-            sharedViewModel.handleError(error, () -> showArtist());
+         public void onFailure(int httpCode, String message) {
+            LOGGER.error("Error loading artist ({})", message);
+            sharedViewModel.handleError(httpCode, message, () -> showArtist());
          }
       });
 
-      sharedViewModel.getRhapsodySdkWrapper().loadArtistBio(artistId, new Callback<BioData>() {
+      sharedViewModel.getRhapsodySdkWrapper().loadArtistBio(artistId, new RhapsodyCallback<BioData>() {
          @Override
-         public void success(BioData bio, Response response) {
-            LOGGER.info("Loaded bio, empty: {}, blurbs #: {}", bio.bio.isEmpty(), bio.blurbs.size());
-            String blurbs = bio.blurbs.stream().collect(Collectors.joining(",\n"));
-            bioProperty().set(bio.bio);
+         public void onSuccess(BioData bioData) {
+            LOGGER.info("Loaded bio, empty: {}, blurbs #: {}", bioData.bio.isEmpty(), bioData.blurbs.size());
+            String blurbs = bioData.blurbs.stream().collect(Collectors.joining(",\n"));
+            bioProperty().set(bioData.bio);
             blubsProperty().set(blurbs);
             loadingProperty().set(false);
          }
 
          @Override
-         public void failure(RetrofitError error) {
+         public void onFailure(int httpCode, String message) {
             loadingProperty().set(false);
-            LOGGER.error("Error loading bio ({})", error.getMessage());
-            sharedViewModel.handleError(error, () -> showArtist());
+            LOGGER.error("Error loading bio ({})", message);
+            sharedViewModel.handleError(httpCode, message, () -> showArtist());
          }
       });
    }

@@ -11,11 +11,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.controlsfx.dialog.ExceptionDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.kaiwinter.jfx.tablecolumn.filter.FilterSupport;
+import com.github.kaiwinter.rhapsody.api.RhapsodyCallback;
 import com.github.kaiwinter.rhapsody.model.AlbumData;
 import com.github.kaiwinter.rhapsody.model.AlbumData.Artist;
 import com.google.gson.Gson;
@@ -32,11 +32,10 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
 
 @Singleton
 public final class LibraryTabViewModel implements ViewModel {
@@ -82,10 +81,9 @@ public final class LibraryTabViewModel implements ViewModel {
    public void loadAllArtistsInLibrary() {
       Platform.runLater(() -> artistsProperty().set(FXCollections.observableArrayList()));
       loadingProperty().set(true);
-      Callback<Collection<Artist>> callback = new Callback<Collection<Artist>>() {
-
+      RhapsodyCallback<Collection<Artist>> callback = new RhapsodyCallback<Collection<Artist>>() {
          @Override
-         public void success(Collection<Artist> artists, Response response) {
+         public void onSuccess(Collection<Artist> artists) {
             LOGGER.info("Loaded {} artists", artists.size());
             ObservableList<Artist> observableArrayList = FXCollections.observableArrayList(artists);
             Comparator<Artist> comparator = (o1, o2) -> o1.name.compareTo(o2.name);
@@ -94,10 +92,10 @@ public final class LibraryTabViewModel implements ViewModel {
          }
 
          @Override
-         public void failure(RetrofitError error) {
-            LOGGER.error(error.getMessage(), error);
+         public void onFailure(int httpCode, String message) {
+            LOGGER.error("{} {}", httpCode, message);
             loadingProperty().set(false);
-            sharedViewModel.handleError(error, () -> loadAllArtistsInLibrary());
+            sharedViewModel.handleError(httpCode, message, () -> loadAllArtistsInLibrary());
          }
       };
       sharedViewModel.getRhapsodySdkWrapper().loadAllArtistsInLibrary(null, callback);
@@ -105,10 +103,9 @@ public final class LibraryTabViewModel implements ViewModel {
 
    public void loadAlbumsOfSelectedArtist(Artist artist) {
       loadingProperty().set(true);
-      Callback<Collection<AlbumData>> callback = new Callback<Collection<AlbumData>>() {
-
+      RhapsodyCallback<Collection<AlbumData>> callback = new RhapsodyCallback<Collection<AlbumData>>() {
          @Override
-         public void success(Collection<AlbumData> albums, Response response) {
+         public void onSuccess(Collection<AlbumData> albums) {
             LOGGER.info("Loaded {} albums", albums.size());
             // Check if selection changed in the meantime
             Artist currentArtist = selectedArtistProperty().get();
@@ -123,10 +120,10 @@ public final class LibraryTabViewModel implements ViewModel {
          }
 
          @Override
-         public void failure(RetrofitError error) {
-            LOGGER.error(error.getMessage(), error);
+         public void onFailure(int httpCode, String message) {
+            LOGGER.error("{} {}", httpCode, message);
             loadingProperty().set(false);
-            sharedViewModel.handleError(error, () -> loadAlbumsOfSelectedArtist(artist));
+            sharedViewModel.handleError(httpCode, message, () -> loadAlbumsOfSelectedArtist(artist));
          }
       };
       sharedViewModel.getRhapsodySdkWrapper().loadAllAlbumsByArtistInLibrary(artist.id, null, callback);
@@ -142,9 +139,9 @@ public final class LibraryTabViewModel implements ViewModel {
       }
 
       loadingProperty().set(true);
-      Callback<Collection<AlbumData>> callback = new Callback<Collection<AlbumData>>() {
+      RhapsodyCallback<Collection<AlbumData>> callback = new RhapsodyCallback<Collection<AlbumData>>() {
          @Override
-         public void success(Collection<AlbumData> albums, Response response) {
+         public void onSuccess(Collection<AlbumData> albums) {
             loadingProperty().set(false);
 
             // reduce data
@@ -168,11 +165,11 @@ public final class LibraryTabViewModel implements ViewModel {
          }
 
          @Override
-         public void failure(RetrofitError error) {
-            LOGGER.error(error.getMessage(), error);
+         public void onFailure(int httpCode, String message) {
+            LOGGER.error("{} {}", httpCode, message);
             loadingProperty().set(false);
             Platform.runLater(() -> {
-               ExceptionDialog exceptionDialog = new ExceptionDialog(error);
+               Alert exceptionDialog = new Alert(AlertType.ERROR, message);
                exceptionDialog.show();
             });
          }
@@ -187,19 +184,18 @@ public final class LibraryTabViewModel implements ViewModel {
 
    public void removeAlbumFromLibrary(AlbumData albumData) {
       loadingProperty().set(true);
-      Callback<Void> callback = new Callback<Void>() {
-
+      RhapsodyCallback<Void> callback = new RhapsodyCallback<Void>() {
          @Override
-         public void success(Void t, Response response) {
+         public void onSuccess(Void data) {
             loadingProperty().set(false);
             loadAlbumsOfSelectedArtist(albumData.artist);
          }
 
          @Override
-         public void failure(RetrofitError error) {
-            LOGGER.error(error.getMessage(), error);
+         public void onFailure(int httpCode, String message) {
+            LOGGER.error("{} {}", httpCode, message);
             loadingProperty().set(false);
-            sharedViewModel.handleError(error, () -> removeAlbumFromLibrary(albumData));
+            sharedViewModel.handleError(httpCode, message, () -> removeAlbumFromLibrary(albumData));
          }
       };
       sharedViewModel.getRhapsodySdkWrapper().removeAlbumFromLibrary(albumData.id, callback);
@@ -216,10 +212,9 @@ public final class LibraryTabViewModel implements ViewModel {
       loadingProperty().set(true);
 
       AtomicInteger threadCount = new AtomicInteger();
-      Callback<Void> removeAlbumCallback = new Callback<Void>() {
-
+      RhapsodyCallback<Void> removeAlbumCallback = new RhapsodyCallback<Void>() {
          @Override
-         public void success(Void empty, Response response) {
+         public void onSuccess(Void data) {
             int runningThreads = threadCount.decrementAndGet();
             if (runningThreads == 0) {
                LOGGER.info("Last album removed, refreshing view");
@@ -228,16 +223,15 @@ public final class LibraryTabViewModel implements ViewModel {
          }
 
          @Override
-         public void failure(RetrofitError error) {
-            LOGGER.error(error.getMessage(), error);
-            sharedViewModel.handleError(error, () -> removeArtistFromLibrary(artist));
+         public void onFailure(int httpCode, String message) {
+            LOGGER.error("{} {}", httpCode, message);
+            sharedViewModel.handleError(httpCode, message, () -> removeArtistFromLibrary(artist));
          }
       };
 
-      Callback<Collection<AlbumData>> loadAlbumsCallback = new Callback<Collection<AlbumData>>() {
-
+      RhapsodyCallback<Collection<AlbumData>> loadAlbumsCallback = new RhapsodyCallback<Collection<AlbumData>>() {
          @Override
-         public void success(Collection<AlbumData> albums, Response response) {
+         public void onSuccess(Collection<AlbumData> albums) {
             LOGGER.info("Loaded {} albums", albums.size());
 
             for (AlbumData albumData : albums) {
@@ -248,29 +242,28 @@ public final class LibraryTabViewModel implements ViewModel {
          }
 
          @Override
-         public void failure(RetrofitError error) {
-            LOGGER.error(error.getMessage(), error);
+         public void onFailure(int httpCode, String message) {
+            LOGGER.error("{} {}", httpCode, message);
             loadingProperty().set(false);
-            sharedViewModel.handleError(error, () -> removeArtistFromLibrary(artist));
+            sharedViewModel.handleError(httpCode, message, () -> removeArtistFromLibrary(artist));
          }
       };
       sharedViewModel.getRhapsodySdkWrapper().loadAllAlbumsByArtistInLibrary(artist.id, null, loadAlbumsCallback);
    }
 
    public void addAlbumToLibrary(AlbumData albumData) {
-      Callback<Void> callback = new Callback<Void>() {
-
+      RhapsodyCallback<Void> callback = new RhapsodyCallback<Void>() {
          @Override
-         public void success(Void t, Response response) {
+         public void onSuccess(Void data) {
             loadingProperty().set(false);
             loadAlbumsOfSelectedArtist(albumData.artist);
          }
 
          @Override
-         public void failure(RetrofitError error) {
-            LOGGER.error(error.getMessage(), error);
+         public void onFailure(int httpCode, String message) {
+            LOGGER.error("{} {}", httpCode, message);
             loadingProperty().set(false);
-            sharedViewModel.handleError(error, () -> removeAlbumFromLibrary(albumData));
+            sharedViewModel.handleError(httpCode, message, () -> removeAlbumFromLibrary(albumData));
          }
       };
       sharedViewModel.getRhapsodySdkWrapper().addAlbumToLibrary(albumData.id, callback);

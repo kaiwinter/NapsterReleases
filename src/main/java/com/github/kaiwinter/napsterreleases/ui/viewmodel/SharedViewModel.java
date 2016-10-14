@@ -16,6 +16,8 @@ import com.github.kaiwinter.rhapsody.api.RhapsodySdkWrapper;
 import com.github.kaiwinter.rhapsody.persistence.impl.PreferencesAuthorizationStore;
 
 import javafx.application.Platform;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Window;
 import javafx.util.Pair;
 import retrofit.RetrofitError;
@@ -51,7 +53,7 @@ public class SharedViewModel {
     * In case of an 401 error (unauthorized) a token refresh is triggered followed by a username/password login if the
     * former fails. If the authorization was successful the <code>actionretryCallback</code> is called.
     * </p>
-    * 
+    *
     * @param error
     *           the error to handle
     * @param actionRetryCallback
@@ -64,6 +66,32 @@ public class SharedViewModel {
       } else {
          Platform.runLater(() -> {
             ExceptionDialog exceptionDialog = new ExceptionDialog(error);
+            exceptionDialog.show();
+         });
+      }
+   }
+
+   /**
+    * <p>
+    * Tries to handle the passed <code>error</code> and calls the <code>actionRetryCallback</code> afterwards. If the
+    * method don't know how to handle the error an {@link ExceptionDialog} is shown to the user.
+    * </p>
+    * <p>
+    * In case of an 401 error (unauthorized) a token refresh is triggered followed by a username/password login if the
+    * former fails. If the authorization was successful the <code>actionretryCallback</code> is called.
+    * </p>
+    * @param message
+    *           the message to show
+    * @param actionRetryCallback
+    *           the callback to execute if the error could be solved
+    */
+   public void handleError(int httpCode, String message, ActionRetryCallback actionRetryCallback) {
+
+      if (httpCode == 401) {
+         tryReAuthorization(actionRetryCallback);
+      } else {
+         Platform.runLater(() -> {
+            Alert exceptionDialog = new Alert(AlertType.ERROR, message);
             exceptionDialog.show();
          });
       }

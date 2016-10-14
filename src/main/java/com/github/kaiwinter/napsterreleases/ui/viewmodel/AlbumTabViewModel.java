@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.kaiwinter.napsterreleases.util.TimeUtil;
+import com.github.kaiwinter.rhapsody.api.RhapsodyCallback;
 import com.github.kaiwinter.rhapsody.model.AlbumData;
 
 import de.saxsys.mvvmfx.ViewModel;
@@ -21,9 +22,6 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.image.Image;
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
 
 @Singleton
 public final class AlbumTabViewModel implements ViewModel {
@@ -105,20 +103,21 @@ public final class AlbumTabViewModel implements ViewModel {
          return;
       }
       loadingProperty().set(true);
-      sharedViewModel.getRhapsodySdkWrapper().loadAlbum(albumData.id, new Callback<AlbumData>() {
+
+      sharedViewModel.getRhapsodySdkWrapper().loadAlbum(albumData.id, new RhapsodyCallback<AlbumData>() {
 
          @Override
-         public void success(AlbumData albumData, Response response) {
+         public void onSuccess(AlbumData albumData) {
             LOGGER.info("Loaded album '{}'", albumData.name);
             setAlbum(albumData);
             loadingProperty().set(false);
          }
 
          @Override
-         public void failure(RetrofitError error) {
+         public void onFailure(int httpCode, String message) {
             loadingProperty().set(false);
-            LOGGER.error("Error loading album ({})", error.getMessage());
-            sharedViewModel.handleError(error, () -> showAlbum());
+            LOGGER.error("Error loading album ({})", message);
+            sharedViewModel.handleError(httpCode, message, () -> showAlbum());
          }
       });
    }

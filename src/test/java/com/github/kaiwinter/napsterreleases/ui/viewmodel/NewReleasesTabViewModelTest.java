@@ -1,8 +1,6 @@
 package com.github.kaiwinter.napsterreleases.ui.viewmodel;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -16,6 +14,7 @@ import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import com.github.kaiwinter.rhapsody.api.RhapsodyCallback;
 import com.github.kaiwinter.rhapsody.api.RhapsodySdkWrapper;
 import com.github.kaiwinter.rhapsody.model.AlbumData;
 import com.github.kaiwinter.rhapsody.model.GenreData;
@@ -28,7 +27,6 @@ import de.saxsys.javafx.test.JfxRunner;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
-import retrofit.Callback;
 
 @RunWith(JfxRunner.class)
 public final class NewReleasesTabViewModelTest {
@@ -41,11 +39,12 @@ public final class NewReleasesTabViewModelTest {
          protected void configure() {
             RhapsodySdkWrapper rhapsodySdkWrapperMock = mock(RhapsodySdkWrapper.class);
             Collection<GenreData> genres = Collections.singletonList(new GenreData());
-            doAnswer(new LoadGenresResultAnswer(genres)).when(rhapsodySdkWrapperMock).loadGenres(any(Callback.class));
+            doAnswer(new LoadGenresResultAnswer(genres)).when(rhapsodySdkWrapperMock)
+               .loadGenres(any(RhapsodyCallback.class));
 
             Collection<AlbumData> releases = Collections.singletonList(new AlbumData());
-            doAnswer(new LoadNewReleasesAnswer(releases)).when(rhapsodySdkWrapperMock).loadGenreNewReleases(anyString(),
-               anyInt(), any(Callback.class));
+            doAnswer(new LoadNewReleasesAnswer(releases)).when(rhapsodySdkWrapperMock).loadGenreNewReleases(any(),
+               any(), any(RhapsodyCallback.class));
 
             SharedViewModel sharedViewModelMock = mock(SharedViewModel.class);
             when(sharedViewModelMock.getRhapsodySdkWrapper()).thenReturn(rhapsodySdkWrapperMock);
@@ -95,7 +94,7 @@ public final class NewReleasesTabViewModelTest {
 
       @Override
       public Void answer(InvocationOnMock invocation) throws Throwable {
-         ((Callback<Collection<GenreData>>) invocation.getArguments()[0]).success(genres, null);
+         ((RhapsodyCallback<Collection<GenreData>>) invocation.getArguments()[0]).onSuccess(genres);
          return null;
       }
    }
@@ -109,7 +108,7 @@ public final class NewReleasesTabViewModelTest {
 
       @Override
       public Void answer(InvocationOnMock invocation) throws Throwable {
-         ((Callback<Collection<AlbumData>>) invocation.getArguments()[2]).success(releases, null);
+         ((RhapsodyCallback<Collection<AlbumData>>) invocation.getArguments()[2]).onSuccess(releases);
          return null;
       }
    }

@@ -8,6 +8,7 @@ import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.kaiwinter.rhapsody.api.RhapsodyCallback;
 import com.github.kaiwinter.rhapsody.model.AlbumData;
 import com.github.kaiwinter.rhapsody.model.ArtistData;
 import com.github.kaiwinter.rhapsody.model.member.ChartsAlbum;
@@ -19,9 +20,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import retrofit.Callback;
 import retrofit.RetrofitError;
-import retrofit.client.Response;
 
 @Singleton
 public final class ChartsTabViewModel implements ViewModel {
@@ -43,10 +42,9 @@ public final class ChartsTabViewModel implements ViewModel {
 
    public void loadCharts() {
 
-      Callback<List<ChartsArtist>> artistsCallback = new Callback<List<ChartsArtist>>() {
-
+      RhapsodyCallback<List<ChartsArtist>> artistsCallback = new RhapsodyCallback<List<ChartsArtist>>() {
          @Override
-         public void success(List<ChartsArtist> artists, Response response) {
+         public void onSuccess(List<ChartsArtist> artists) {
             String string = "";
             for (ChartsArtist chartsArtist : artists) {
                ArtistData artistMeta = sharedViewModel.getRhapsodySdkWrapper().getArtistMeta(chartsArtist.id);
@@ -60,16 +58,15 @@ public final class ChartsTabViewModel implements ViewModel {
          }
 
          @Override
-         public void failure(RetrofitError error) {
-            LOGGER.error(error.getMessage(), error);
+         public void onFailure(int httpCode, String message) {
+            LOGGER.error("{} {}", httpCode, message);
          }
       };
       sharedViewModel.getRhapsodySdkWrapper().loadTopPlayedArtists(null, RangeEnum.life, artistsCallback);
       //
-      Callback<List<ChartsAlbum>> albumCallback = new Callback<List<ChartsAlbum>>() {
-
+      RhapsodyCallback<List<ChartsAlbum>> albumCallback = new RhapsodyCallback<List<ChartsAlbum>>() {
          @Override
-         public void success(List<ChartsAlbum> albums, Response response) {
+         public void onSuccess(List<ChartsAlbum> albums) {
             String string = "";
             for (ChartsAlbum chartsAlbum : albums) {
                try {
@@ -89,9 +86,9 @@ public final class ChartsTabViewModel implements ViewModel {
          }
 
          @Override
-         public void failure(RetrofitError error) {
-            LOGGER.error(error.getMessage(), error);
-            sharedViewModel.handleError(error, () -> loadCharts());
+         public void onFailure(int httpCode, String message) {
+            LOGGER.error("{} {}", httpCode, message);
+            sharedViewModel.handleError(httpCode, message, () -> loadCharts());
             loading.set(false);
          }
       };
