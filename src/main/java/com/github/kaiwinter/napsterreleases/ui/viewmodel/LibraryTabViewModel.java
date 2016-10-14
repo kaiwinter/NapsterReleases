@@ -184,7 +184,7 @@ public final class LibraryTabViewModel implements ViewModel {
 
    }
 
-   public void removeArtistFromLibrary(AlbumData albumData) {
+   public void removeAlbumFromLibrary(AlbumData albumData) {
       loadingProperty().set(true);
       Callback<Void> callback = new Callback<Void>() {
 
@@ -198,7 +198,7 @@ public final class LibraryTabViewModel implements ViewModel {
          public void failure(RetrofitError error) {
             LOGGER.error(error.getMessage(), error);
             loadingProperty().set(false);
-            sharedViewModel.handleError(error, () -> removeArtistFromLibrary(albumData));
+            sharedViewModel.handleError(error, () -> removeAlbumFromLibrary(albumData));
          }
       };
       sharedViewModel.getRhapsodySdkWrapper().removeAlbumFromLibrary(albumData.id, callback);
@@ -217,7 +217,7 @@ public final class LibraryTabViewModel implements ViewModel {
          public void failure(RetrofitError error) {
             LOGGER.error(error.getMessage(), error);
             loadingProperty().set(false);
-            sharedViewModel.handleError(error, () -> removeArtistFromLibrary(albumData));
+            sharedViewModel.handleError(error, () -> removeAlbumFromLibrary(albumData));
          }
       };
       sharedViewModel.getRhapsodySdkWrapper().addAlbumToLibrary(albumData.id, callback);

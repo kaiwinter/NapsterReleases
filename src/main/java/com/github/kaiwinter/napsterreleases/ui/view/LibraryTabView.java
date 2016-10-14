@@ -101,7 +101,7 @@ public final class LibraryTabView implements FxmlView<LibraryTabViewModel> {
          MenuItem removeMenuItem = new MenuItem("Remove from Library");
          removeMenuItem.setOnAction(event -> {
             AlbumData albumData = releasesTv.getSelectionModel().getSelectedItem();
-            viewModel.removeArtistFromLibrary(albumData);
+            viewModel.removeAlbumFromLibrary(albumData);
          });
          contextMenu.getItems().add(removeMenuItem);
          TableRow<AlbumData> row = new TableRow<>();
