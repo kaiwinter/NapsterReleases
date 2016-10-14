@@ -127,6 +127,16 @@ public final class LibraryTabView implements FxmlView<LibraryTabViewModel> {
                }
             };
 
+            ContextMenu contextMenu = new ContextMenu();
+            MenuItem removeMenuItem = new MenuItem("Remove from Library");
+            removeMenuItem.setOnAction(event -> {
+               Artist artist = artistLv.getSelectionModel().getSelectedItem();
+               viewModel.removeArtistFromLibrary(artist);
+            });
+            contextMenu.getItems().add(removeMenuItem);
+            listCell.contextMenuProperty().bind(Bindings.when(Bindings.isNotNull(listCell.itemProperty()))
+               .then(contextMenu).otherwise((ContextMenu) null));
+
             return listCell;
          }
       });

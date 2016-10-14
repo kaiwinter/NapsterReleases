@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -79,7 +80,7 @@ public final class LibraryTabViewModel implements ViewModel {
    }
 
    public void loadAllArtistsInLibrary() {
-      artistsProperty().set(FXCollections.observableArrayList());
+      Platform.runLater(() -> artistsProperty().set(FXCollections.observableArrayList()));
       loadingProperty().set(true);
       Callback<Collection<Artist>> callback = new Callback<Collection<Artist>>() {
 
@@ -202,6 +203,58 @@ public final class LibraryTabViewModel implements ViewModel {
          }
       };
       sharedViewModel.getRhapsodySdkWrapper().removeAlbumFromLibrary(albumData.id, callback);
+   }
+
+   /**
+    * Removes all albums of the artist from the library. First the albums of the artist are loaded from the library and
+    * afterwards deleted.
+    *
+    * @param artist
+    *           the artist to remove
+    */
+   public void removeArtistFromLibrary(Artist artist) {
+      loadingProperty().set(true);
+
+      AtomicInteger threadCount = new AtomicInteger();
+      Callback<Void> removeAlbumCallback = new Callback<Void>() {
+
+         @Override
+         public void success(Void empty, Response response) {
+            int runningThreads = threadCount.decrementAndGet();
+            if (runningThreads == 0) {
+               LOGGER.info("Last album removed, refreshing view");
+               loadAllArtistsInLibrary();
+            }
+         }
+
+         @Override
+         public void failure(RetrofitError error) {
+            LOGGER.error(error.getMessage(), error);
+            sharedViewModel.handleError(error, () -> removeArtistFromLibrary(artist));
+         }
+      };
+
+      Callback<Collection<AlbumData>> loadAlbumsCallback = new Callback<Collection<AlbumData>>() {
+
+         @Override
+         public void success(Collection<AlbumData> albums, Response response) {
+            LOGGER.info("Loaded {} albums", albums.size());
+
+            for (AlbumData albumData : albums) {
+               threadCount.incrementAndGet();
+               sharedViewModel.getRhapsodySdkWrapper().removeAlbumFromLibrary(albumData.id, removeAlbumCallback);
+            }
+            loadingProperty().set(false);
+         }
+
+         @Override
+         public void failure(RetrofitError error) {
+            LOGGER.error(error.getMessage(), error);
+            loadingProperty().set(false);
+            sharedViewModel.handleError(error, () -> removeArtistFromLibrary(artist));
+         }
+      };
+      sharedViewModel.getRhapsodySdkWrapper().loadAllAlbumsByArtistInLibrary(artist.id, null, loadAlbumsCallback);
    }
 
    public void addAlbumToLibrary(AlbumData albumData) {
