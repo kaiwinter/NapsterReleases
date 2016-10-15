@@ -17,6 +17,7 @@ import de.saxsys.mvvmfx.InjectViewModel;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ContextMenu;
@@ -24,6 +25,7 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
@@ -92,6 +94,8 @@ public final class LibraryTabView implements FxmlView<LibraryTabViewModel> {
             viewModel.loadAlbumsOfSelectedArtist(newValue);
          }
       });
+
+      releasesTv.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
    }
 
    private void setFactories() {
@@ -100,8 +104,8 @@ public final class LibraryTabView implements FxmlView<LibraryTabViewModel> {
          contextMenu.getItems().add(new AddToWatchlistMenuItem(releasesTv, artistWatchlistTabViewModel));
          MenuItem removeMenuItem = new MenuItem("Remove from Library");
          removeMenuItem.setOnAction(event -> {
-            AlbumData albumData = releasesTv.getSelectionModel().getSelectedItem();
-            viewModel.removeAlbumFromLibrary(albumData);
+            ObservableList<AlbumData> albumData = releasesTv.getSelectionModel().getSelectedItems();
+            viewModel.removeAlbumsFromLibrary(albumData);
          });
          contextMenu.getItems().add(removeMenuItem);
          TableRow<AlbumData> row = new TableRow<>();

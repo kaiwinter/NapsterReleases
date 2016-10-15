@@ -32,6 +32,7 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.FileChooser;
@@ -201,6 +202,34 @@ public final class LibraryTabViewModel implements ViewModel {
       sharedViewModel.getRhapsodySdkWrapper().removeAlbumFromLibrary(albumData.id, callback);
    }
 
+   public void removeAlbumsFromLibrary(Collection<AlbumData> albums) {
+      loadingProperty().set(true);
+
+      AtomicInteger threadCount = new AtomicInteger();
+      RhapsodyCallback<Void> callback = new RhapsodyCallback<Void>() {
+         @Override
+         public void onSuccess(Void data) {
+            loadingProperty().set(false);
+            int runningThreads = threadCount.decrementAndGet();
+            if (runningThreads == 0) {
+               LOGGER.info("Last album removed, refreshing view");
+               loadAlbumsOfSelectedArtist(albums.iterator().next().artist);
+            }
+         }
+
+         @Override
+         public void onFailure(int httpCode, String message) {
+            LOGGER.error("{} {}", httpCode, message);
+            loadingProperty().set(false);
+            sharedViewModel.handleError(httpCode, message, () -> removeAlbumsFromLibrary(albums));
+         }
+      };
+      for (AlbumData albumData : albums) {
+         threadCount.incrementAndGet();
+         sharedViewModel.getRhapsodySdkWrapper().removeAlbumFromLibrary(albumData.id, callback);
+      }
+   }
+
    /**
     * Removes all albums of the artist from the library. First the albums of the artist are loaded from the library and
     * afterwards deleted.
@@ -211,33 +240,11 @@ public final class LibraryTabViewModel implements ViewModel {
    public void removeArtistFromLibrary(Artist artist) {
       loadingProperty().set(true);
 
-      AtomicInteger threadCount = new AtomicInteger();
-      RhapsodyCallback<Void> removeAlbumCallback = new RhapsodyCallback<Void>() {
-         @Override
-         public void onSuccess(Void data) {
-            int runningThreads = threadCount.decrementAndGet();
-            if (runningThreads == 0) {
-               LOGGER.info("Last album removed, refreshing view");
-               loadAllArtistsInLibrary();
-            }
-         }
-
-         @Override
-         public void onFailure(int httpCode, String message) {
-            LOGGER.error("{} {}", httpCode, message);
-            sharedViewModel.handleError(httpCode, message, () -> removeArtistFromLibrary(artist));
-         }
-      };
-
       RhapsodyCallback<Collection<AlbumData>> loadAlbumsCallback = new RhapsodyCallback<Collection<AlbumData>>() {
          @Override
          public void onSuccess(Collection<AlbumData> albums) {
             LOGGER.info("Loaded {} albums", albums.size());
-
-            for (AlbumData albumData : albums) {
-               threadCount.incrementAndGet();
-               sharedViewModel.getRhapsodySdkWrapper().removeAlbumFromLibrary(albumData.id, removeAlbumCallback);
-            }
+            removeAlbumsFromLibrary(albums);
             loadingProperty().set(false);
          }
 
@@ -249,6 +256,9 @@ public final class LibraryTabViewModel implements ViewModel {
          }
       };
       sharedViewModel.getRhapsodySdkWrapper().loadAllAlbumsByArtistInLibrary(artist.id, null, loadAlbumsCallback);
+      ObservableList<Artist> observableList = artists.get();
+      SortedList<Artist> sortedList = (SortedList<Artist>) observableList;
+      sortedList.getSource().remove(artist);
    }
 
    public void addAlbumToLibrary(AlbumData albumData) {
@@ -263,7 +273,7 @@ public final class LibraryTabViewModel implements ViewModel {
          public void onFailure(int httpCode, String message) {
             LOGGER.error("{} {}", httpCode, message);
             loadingProperty().set(false);
-            sharedViewModel.handleError(httpCode, message, () -> removeAlbumFromLibrary(albumData));
+            sharedViewModel.handleError(httpCode, message, () -> addAlbumToLibrary(albumData));
          }
       };
       sharedViewModel.getRhapsodySdkWrapper().addAlbumToLibrary(albumData.id, callback);
