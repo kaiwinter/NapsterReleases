@@ -74,7 +74,7 @@
         <dependency>
             <groupId>com.github.kaiwinter</groupId>
             <artifactId>rhapsody-java-sdk</artifactId>
-            <version>1.4.0-SNAPSHOT</version>
+            <version>d59b484c15</version>
         </dependency>
 
         <dependency>
