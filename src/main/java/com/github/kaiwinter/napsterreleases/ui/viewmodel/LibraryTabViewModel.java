@@ -42,6 +42,9 @@ import javafx.stage.FileChooser.ExtensionFilter;
 public final class LibraryTabViewModel implements ViewModel {
    private static final Logger LOGGER = LoggerFactory.getLogger(LibraryTabViewModel.class.getSimpleName());
 
+   private static final int MAX_ALBUMS = 5000;
+   private static final int MAX_ARTISTS = 5000;
+
    private final BooleanProperty loading = new SimpleBooleanProperty();
 
    private final ListProperty<Artist> artists = new SimpleListProperty<>();
@@ -99,7 +102,7 @@ public final class LibraryTabViewModel implements ViewModel {
             sharedViewModel.handleError(httpCode, message, () -> loadAllArtistsInLibrary());
          }
       };
-      sharedViewModel.getRhapsodySdkWrapper().loadAllArtistsInLibrary(null, callback);
+      sharedViewModel.getRhapsodySdkWrapper().loadAllArtistsInLibrary(MAX_ARTISTS, callback);
    }
 
    public void loadAlbumsOfSelectedArtist(Artist artist) {
@@ -143,6 +146,7 @@ public final class LibraryTabViewModel implements ViewModel {
       RhapsodyCallback<Collection<AlbumData>> callback = new RhapsodyCallback<Collection<AlbumData>>() {
          @Override
          public void onSuccess(Collection<AlbumData> albums) {
+            LOGGER.info("Exporting {} albums", albums.size());
             loadingProperty().set(false);
 
             // reduce data
@@ -175,7 +179,7 @@ public final class LibraryTabViewModel implements ViewModel {
             });
          }
       };
-      sharedViewModel.getRhapsodySdkWrapper().loadAllAlbumsInLibrary(null, callback);
+      sharedViewModel.getRhapsodySdkWrapper().loadAllAlbumsInLibrary(MAX_ALBUMS, callback);
    }
 
    public void importLibrary() {
