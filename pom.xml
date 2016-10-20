@@ -77,11 +77,11 @@
             <version>d59b484c15</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.github.kaiwinter</groupId>
-            <artifactId>jfx-tableview-filter</artifactId>
-            <version>1.1.0</version>
-        </dependency>
+    	<dependency>
+    	    <groupId>com.github.kaiwinter</groupId>
+    	    <artifactId>jfx-tableview-filter</artifactId>
+    	    <version>-SNAPSHOT</version>
+    	</dependency>
 
         <dependency>
             <groupId>de.saxsys</groupId>
