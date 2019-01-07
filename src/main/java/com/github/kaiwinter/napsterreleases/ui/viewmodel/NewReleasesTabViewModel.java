@@ -31,6 +31,8 @@ import javafx.scene.control.TreeItem;
 @Singleton
 public final class NewReleasesTabViewModel implements ViewModel {
    private static final Logger LOGGER = LoggerFactory.getLogger(NewReleasesTabViewModel.class.getSimpleName());
+   
+   private static final int RELEASES_LIMIT = 100;
 
    private static final String RHAPSODY_CURATED = "rhapsody_curated";
    private static final String RHAPSODY_PERSONALIZED = "rhapsody_personalized";
@@ -194,11 +196,11 @@ public final class NewReleasesTabViewModel implements ViewModel {
       };
 
       if (RHAPSODY_CURATED.equals(genreData.id)) {
-         sharedViewModel.getRhapsodySdkWrapper().loadAlbumNewReleases(null, callback);
+         sharedViewModel.getRhapsodySdkWrapper().loadAlbumNewReleases(null, RELEASES_LIMIT, callback);
       } else if (RHAPSODY_PERSONALIZED.equals(genreData.id)) {
          loadPersonalizedNewReleases(callback);
       } else {
-         sharedViewModel.getRhapsodySdkWrapper().loadGenreNewReleases(genreData.id, null, callback);
+         sharedViewModel.getRhapsodySdkWrapper().loadGenreNewReleases(genreData.id, RELEASES_LIMIT, callback);
       }
    }
 
@@ -208,7 +210,7 @@ public final class NewReleasesTabViewModel implements ViewModel {
             @Override
             public void onSuccess(AccountData userAccountData) {
                NewReleasesTabViewModel.this.userAccountData = userAccountData;
-               sharedViewModel.getRhapsodySdkWrapper().loadAlbumNewReleases(userAccountData.id, callback);
+               sharedViewModel.getRhapsodySdkWrapper().loadAlbumNewReleases(userAccountData.id, RELEASES_LIMIT, callback);
             }
 
             @Override
@@ -219,7 +221,7 @@ public final class NewReleasesTabViewModel implements ViewModel {
          };
          sharedViewModel.getRhapsodySdkWrapper().loadAccount(loadUserAccountCallback);
       } else {
-         sharedViewModel.getRhapsodySdkWrapper().loadAlbumNewReleases(userAccountData.id, callback);
+         sharedViewModel.getRhapsodySdkWrapper().loadAlbumNewReleases(userAccountData.id, RELEASES_LIMIT, callback);
       }
    }
 
